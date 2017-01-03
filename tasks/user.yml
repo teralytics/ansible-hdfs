@@ -1,0 +1,60 @@
+---
+- name: Add hadoop group on all machines
+  group: name={{hdfs_group}} state=present
+
+- name: Add hadoop user on first namenode only
+  user: name={{hdfs_user}} comment="Hadoop superuser" uid=1040 group={{hdfs_group}} createhome=yes generate_ssh_key=yes
+  when: inventory_hostname == hdfs_namenodes[0]
+
+- name: Create user on all machines
+  user: name={{hdfs_user}} comment="Hadoop superuser" uid=1040 group={{hdfs_group}} createhome=yes
+  register: created_user
+
+- name: Check if ssh keys should be distributed
+  stat: path={{ hdfs_ssh_known_hosts_file }}
+  register: host_file_status
+
+- set_fact: distribute_keys={{not host_file_status.stat.exists or hdfs_redistribute_ssh_keys or created_user.changed}}
+
+- name: Fetch private key
+  fetch: src=/home/{{hdfs_user}}/.ssh/id_rsa dest=rsa_key
+  when: inventory_hostname == hdfs_namenodes[0] and distribute_keys
+
+- name: Fetch public key
+  fetch: src=/home/{{hdfs_user}}/.ssh/id_rsa.pub dest=rsa_key
+  when: inventory_hostname == hdfs_namenodes[0] and distribute_keys
+
+- name: Create .ssh directory for {{hdfs_user}}
+  file: path=/home/{{hdfs_user}}/.ssh state=directory owner={{hdfs_user}} group={{hdfs_group}} mode=700
+  when: distribute_keys
+
+- name: Copy private key to all machines
+  copy: src=rsa_key/{{hdfs_namenodes[0]}}/home/{{hdfs_user}}/.ssh/id_rsa dest=/home/{{hdfs_user}}/.ssh/id_rsa owner={{hdfs_user}} group={{hdfs_group}} mode=600
+  when: distribute_keys
+
+- name: Add pubkeys to master server
+  authorized_key: user={{hdfs_user}} key="{{ lookup('file', 'rsa_key/{{hdfs_namenodes[0]}}/home/{{hdfs_user}}/.ssh/id_rsa.pub') }}"
+  when: distribute_keys
+
+- name: Make sure the known hosts file exists
+  file: path={{ hdfs_ssh_known_hosts_file }} state=touch owner={{hdfs_user}} group={{hdfs_group}} mode=644
+  when: (not host_file_status.stat.exists) or (distribute_keys and host_file_status.stat.mode == "0644")
+  changed_when: (not host_file_status.stat.exists) or host_file_status.stat.mode != "0644"
+
+- name: Check host name availability
+  shell: "ssh-keygen -f {{ hdfs_ssh_known_hosts_file }} -F {{ item }}"
+  with_items: hdfs_hadoop_hosts
+  when: distribute_keys
+  register: ssh_known_host_results
+  ignore_errors: yes
+  changed_when: False
+
+- name: Scan the public key
+  shell: "ssh-keyscan -H -T 10 {{ item.item }} >> {{ hdfs_ssh_known_hosts_file }}"
+  with_items: ssh_known_host_results.results
+  when: item is defined and item.stdout == ""
+  no_log: True
+
+- name: Delete key locally
+  local_action: file path=rsa_key state=absent
+  when: inventory_hostname == hdfs_namenodes[0] and distribute_keys

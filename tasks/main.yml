@@ -1,0 +1,37 @@
+---
+- include: native.yml
+  when: hdfs_compile_from_source and inventory_hostname == hdfs_compile_node
+  tags: native
+
+- include: user.yml
+  tags: user
+
+- include: base.yml
+  tags: base
+
+- include: config.yml
+  tags: base,config
+
+- include: datanode.yml
+  when: inventory_hostname in hdfs_datanodes
+  tags: datanode
+
+- include: namenode.yml
+  when: inventory_hostname in hdfs_namenodes
+  tags: namenode
+
+- include: secondarynamenode.yml
+  when: inventory_hostname in hdfs_secondarynamenodes and not hdfs_ha_enabled
+  tags: secondarynamenode
+
+- include: journalnode.yml
+  when: inventory_hostname in hdfs_journalnodes and hdfs_ha_enabled
+  tags: journalnode
+
+- include: bootstrap_spof.yml
+  when: hdfs_bootstrap and not hdfs_ha_enabled
+  tags: bootstrap
+
+- include: bootstrap_ha.yml
+  when: hdfs_bootstrap and hdfs_ha_enabled
+  tags: bootstrap

@@ -1,0 +1,36 @@
+- name: Reload systemd daemon
+  shell: "systemctl daemon-reload"
+  when: ansible_service_mgr == "systemd"
+
+- name: Restart namenode
+  service: name=hdfs-namenode state=restarted
+  when:
+   - inventory_hostname in hdfs_namenodes
+   - hdfs_ansible_handlers|bool
+
+- name: Restart datanode
+  service: name=hdfs-datanode state=restarted
+  when:
+   - inventory_hostname in hdfs_datanodes
+   - hdfs_ansible_handlers|bool
+
+- name: Restart journalnode
+  service: name=hdfs-journalnode state=restarted
+  when:
+   - hdfs_ha_enabled
+   - inventory_hostname in hdfs_journalnodes
+   - hdfs_ansible_handlers|bool
+
+- name: Restart zkfc
+  service: name=hdfs-zkfc state=restarted
+  when:
+   - hdfs_ha_enabled
+   - inventory_hostname in hdfs_namenodes
+   - hdfs_ansible_handlers|bool
+
+- name: Restart secondary namenode
+  service: name=hdfs-secondarynamenode state=restarted
+  when:
+   - not hdfs_ha_enabled
+   - inventory_hostname in hdfs_secondary_namenodes
+   - hdfs_ansible_handlers|bool

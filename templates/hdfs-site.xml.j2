@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+{% if hdfs_ha_enabled %}
+  <property>
+    <name>dfs.nameservices</name>
+    <value>{{ hdfs_nameservices }}</value>
+  </property>
+  <property>
+    <name>dfs.nameservice.id</name>
+    <value>{{ hdfs_nameservices }}</value>
+  </property>
+  <property>
+    <name>dfs.ha.namenodes.{{ hdfs_nameservices }}</name>
+    <value>{{ hdfs_namenodes | join(',') }}</value>
+  </property>
+{% if hdfs_ha_enabled and inventory_hostname in hdfs_namenodes %}
+  <property>
+    <name>dfs.ha.namenode.id</name>
+    <value>{{ inventory_hostname }}</value>
+  </property>
+{% endif %}
+{% for host in hdfs_namenodes %}
+  <property>
+    <name>dfs.namenode.rpc-address.{{ hdfs_nameservices }}.{{ host }}</name>
+    <value>{{ host }}:8020</value>
+  </property>
+  <property>
+    <name>dfs.namenode.rpc-bind-host.{{ hdfs_nameservices }}.{{ host }}</name>
+    <value>0.0.0.0</value>
+  </property>
+{% endfor %}
+{% for host in hdfs_namenodes %}
+  <property>
+    <name>dfs.namenode.http-address.{{ hdfs_nameservices }}.{{ host }}</name>
+    <value>{{ host }}:50070</value>
+  </property>
+  <property>
+    <name>dfs.namenode.http-bind-host.{{ hdfs_nameservices }}.{{ host }}</name>
+    <value>0.0.0.0</value>
+  </property>
+{% endfor %}
+  <property>
+    <name>dfs.namenode.shared.edits.dir</name>
+    <value>qjournal://{{ hdfs_journalnodes | join(':8485' + ';') }}:8485/{{ hdfs_nameservices }}</value>
+  </property>
+  <property>
+    <name>dfs.journalnode.edits.dir</name>
+    <value>{{ hdfs_dfs_journalnode_edits_dir }}</value>
+  </property>
+  <property>
+    <name>dfs.client.failover.proxy.provider.{{ hdfs_nameservices }}</name>
+    <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+  </property>
+  <property>
+    <name>dfs.ha.fencing.methods</name>
+    <value>sshfence</value>
+  </property>
+   <property>
+    <name>dfs.ha.fencing.ssh.private-key-files</name>
+    <value>/home/{{ hdfs_user }}/.ssh/id_rsa</value>
+  </property>
+  <property>
+    <name>dfs.ha.automatic-failover.enabled</name>
+    <value>true</value>
+  </property>
+{% else %}
+  <property>
+    <name>dfs.namenode.secondary.http-address</name>
+    <value>{{ hdfs_secondary_namenode_http_address }}</value>
+  </property>
+  <property>
+    <name>dfs.namenode.checkpoint.dir</name>
+    <value>{{ hdfs_namenode_checkpoint_dir_list | join(',') }}</value>
+  </property>
+{% endif %}
+  <property>
+    <name>dfs.replication</name>
+    <value>{{ hdfs_dfs_replication }}</value>
+  </property>
+  <property>
+    <name>dfs.datanode.data.dir</name>
+    <value>{{ hdfs_datanode_dir_list | join(',') }}</value>
+  </property>
+{% if inventory_hostname in hdfs_namenodes %}
+  <property>
+    <name>dfs.namenode.name.dir</name>
+    <value>{{ hdfs_namenode_dir_list | join(',') }}</value>
+  </property>
+{% endif %}
+
+  <property>
+    <name>dfs.permissions.superusergroup</name>
+    <value>{{ hdfs_dfs_permissions_superusergroup }}</value>
+  </property>
+  <property>
+    <name>fs.permissions.umask-mode</name>
+    <value>{{ hdfs_fs_permissions_umask_mode }}</value>
+  </property>
+  <property>
+    <name>dfs.hosts.exclude</name>
+    <value>{{ hdfs_conf_dir }}/dfs.hosts.exclude</value>
+  </property>
+  <property>
+    <name>dfs.blocksize</name>
+    <value>{{ hdfs_dfs_blocksize }}</value>
+    <final>true</final>
+  </property>
+  <property>
+    <name>dfs.namenode.avoid.read.stale.datanode</name>
+    <value>{{ hdfs_dfs_namenode_avoid_read_stale_datanode | lower}}</value>
+  </property>
+  <property>
+    <name>dfs.namenode.avoid.write.stale.datanode</name>
+    <value>{{ hdfs_dfs_namenode_avoid_write_stale_datanode | lower}}</value>
+  </property>
+  <property>
+    <name>dfs.support.append</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>dfs.namenode.write.stale.datanode.ratio</name>
+    <value>{{ hdfs_dfs_namenode_write_stale_datanode_ratio }}</value>
+  </property>
+  <property>
+    <name>dfs.namenode.handler.count</name>
+    <value>{{ hdfs_dfs_namenode_handler_count }}</value>
+  </property>
+  <property>
+    <name>dfs.namenode.service.handler.count</name>
+    <value>{{ hdfs_dfs_namenode_service_handler_count }}</value>
+  </property>
+  <property>
+    <name>dfs.datanode.du.reserved</name>
+    <value>{{ hdfs_dfs_datanode_du_reserved }}</value>
+  </property>
+  <property>
+    <name>dfs.datanode.data.dir.perm</name>
+    <value>{{ hdfs_dfs_datanode_data_dir_perm }}</value>
+  </property>
+  <property>
+    <name>dfs.datanode.max.transfer.threads</name>
+    <value>{{ hdfs_dfs_datanode_max_transfer_threads }}</value>
+  </property>
+  <property>
+    <name>dfs.datanode.fsdataset.volume.choosing.policy</name>
+    <value>org.apache.hadoop.hdfs.server.datanode.fsdataset.AvailableSpaceVolumeChoosingPolicy</value>
+  </property>
+
+  <property>
+    <name>dfs.replication.max</name>
+    <value>{{ hdfs_dfs_replication_max }}</value>
+  </property>
+  <property>
+    <name>dfs.namenode.replication.min</name>
+    <value>{{ hdfs_dfs_namenode_replication_min }}</value>
+  </property>
+  <property>
+    <name>dfs.namenode.checkpoint.period</name>
+    <value>{{ hdfs_dfs_namenode_checkpoint_period }}</value>
+  </property>
+  <property>
+    <name>dfs.namenode.audit.log.async</name>
+    <value>{{ hdfs_dfs_namenode_audit_log_async | lower }}</value>
+  </property>
+  <property>
+    <name>dfs.client.file-block-storage-locations.num-threads</name>
+    <value>{{ hdfs_dfs_client_file_block_storage_locations_num_threads }}</value>
+  </property>
+  <property>
+    <name>dfs.client.file-block-storage-locations.timeout.millis</name>
+    <value>{{ hdfs_dfs_client_file_block_storage_locations_timeout_millis }}</value>
+  </property>
+  <property>
+    <name>dfs.client.read.shortcircuit</name>
+    <value>{{ hdfs_enable_short_circuit_reads | lower }}</value>
+  </property>
+{% if hdfs_enable_short_circuit_reads is defined %}
+  <property>
+    <name>dfs.domain.socket.path</name>
+    <value>{{ hdfs_dfs_domain_socket_path_folder }}/dn._PORT</value>
+  </property>
+{% endif %}
+{% if hdfs_site_additional_properties is defined %}
+{% for property in hdfs_site_additional_properties %}
+  <property>
+    <name>{{property.name}}</name>
+    <value>{{property.value}}</value>
+{% if property_final is defined %}
+    <final>true</final>
+{% endif %}
+  </property>
+{% endfor %}
+{% endif %}
+</configuration>

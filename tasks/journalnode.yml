@@ -1,0 +1,12 @@
+---
+- name: Create journalnode edits dir
+  file: path={{hdfs_dfs_journalnode_edits_dir}} state=directory owner={{hdfs_user}} group={{hdfs_group}} mode={{ hdfs_dfs_journalnode_edits_dir_perm }}
+
+- set_fact: program="journalnode"
+
+- name: Deploy init.d service for journalnode
+  template: src=hdfs-service.j2 dest=/etc/init.d/hdfs-journalnode owner=root group=root mode=755
+  notify: Reload systemd daemon
+
+- name: Register journalnode service
+  service: name=hdfs-journalnode enabled=yes

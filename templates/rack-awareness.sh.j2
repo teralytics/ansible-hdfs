@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+echo $@ | xargs -n 1 | awk -F '.' '{{ hdfs_rack_script_awk }}'

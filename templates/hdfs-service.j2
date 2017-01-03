@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+### BEGIN INIT INFO
+# Provides:          hdfs-{{program}}
+# Required-Start:    $remote_fs $network
+# Required-Stop:     $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start hdfs-{{program}} daemon
+# Description: Start hdfs-{{program}} daemon
+### END INIT INFO
+
+HADOOP_HOME={{hdfs_hadoop_home}}
+HADOOP_CONF_DIR={{hdfs_conf_dir}}
+
+. $HADOOP_CONF_DIR/hadoop-env.sh
+
+HADOOP_PID_DIR=${HADOOP_PID_DIR:-/var/run/}
+NAME="hdfs-{{program}}"
+PIDFILE="$HADOOP_PID_DIR/hadoop-${NAME}.pid"
+
+. /lib/lsb/init-functions
+
+case "$1" in
+  start)
+        sudo su - {{hdfs_user}} -c "$HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs start {{program}}"
+        ;;
+  stop)
+        sudo su - {{hdfs_user}} -c "$HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs stop {{program}}"
+        ;;
+  status)
+        status_of_proc -p $PIDFILE "$NAME" "$NAME" && exit 0 || exit $?
+        ;;
+  restart)
+        sudo su - {{hdfs_user}} -c "$HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs stop {{program}}"
+        sudo su - {{hdfs_user}} -c "$HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs start {{program}}"
+        ;;
+  *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit 0

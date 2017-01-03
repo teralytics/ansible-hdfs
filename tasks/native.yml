@@ -1,0 +1,43 @@
+---
+- name: Make sure base dir exists
+  file: path={{hdfs_parent_dir}} state=directory owner=root group=root mode=0755 follow=yes
+
+- name: Install some tools
+  apt: name={{item}} state=latest update_cache=yes
+  with_items:
+  - "git"
+  - "maven"
+  - "gcc"
+  - "g++"
+  - "make"
+  - "cmake"
+  - "zlib1g-dev"
+  - "libcurl4-openssl-dev"
+  - "libprotobuf8"
+  - "protobuf-compiler"
+  - "libssl-dev"
+  - "bzip2"
+  - "libbz2-dev"
+  - "snappy"
+  - "libsnappy-dev"
+
+- name: Copy Hadoop .tgz to {{hdfs_parent_dir}} and unpack it
+  unarchive: src=hadoop-{{hdfs_version}}-src.tar.gz dest={{hdfs_parent_dir}} owner={{hdfs_user}} group={{hdfs_group}} creates="{{hdfs_hadoop_home}}-{{hdfs_version}}-src"
+  when: not hdfs_compile_from_git
+
+- name: Clone hadoop git repo
+  git: repo="https://github.com/apache/hadoop.git" dest="{{hdfs_hadoop_home}}-{{hdfs_version}}-src" version="{{hdfs_compile_version}}" depth=1
+  when: hdfs_compile_from_git
+
+- name: Fix ownerships for git repo
+  file: path="{{hdfs_hadoop_home}}-{{hdfs_version}}-src" owner={{hdfs_user}} group={{hdfs_group}} recurse=yes
+
+- name: Compile
+  shell: mvn package -Pdist,native -DskipTests -Dtar -e -Drequire.snappy -Drequire.bzip2
+  args:
+    chdir: "{{hdfs_hadoop_home}}-{{hdfs_version}}-src"
+    creates: "{{hdfs_hadoop_home}}-{{hdfs_version}}-src/hadoop-dist/target/hadoop-{{hdfs_version}}.tar.gz"
+  become_user: "{{hdfs_user}}"
+
+- name: Fetch hadoop-{{hdfs_version}}.tar.gz to {{hdfs_fetch_folder}}
+  fetch: src="{{hdfs_hadoop_home}}-{{hdfs_version}}-src/hadoop-dist/target/hadoop-{{hdfs_version}}.tar.gz" dest="{{hdfs_fetch_folder}}/" flat=yes

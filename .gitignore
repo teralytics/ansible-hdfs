@@ -7,3 +7,9 @@
 .idea_modules/
 .idea/
 *.iws
+.bundle/
+vendor/
+*.retry
+.molecule
+.cache
+__pycache__

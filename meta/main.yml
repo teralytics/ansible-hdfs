@@ -1,0 +1,24 @@
+---
+galaxy_info:
+  author: Florian Froese
+  description: Installing HDFS for Ubuntu.
+  company: Teralytics
+  license: Apache 2.0
+  min_ansible_version: 2.0
+  platforms:
+  - name: Ubuntu
+    versions:
+    - lucid
+    - precise
+    - trusty
+  - name: Debian
+    versions:
+    - squeeze
+    - wheezy
+  categories:
+  - hdfs
+  galaxy_tags:
+  - hdfs
+  - hadoop
+  - native
+  - installer

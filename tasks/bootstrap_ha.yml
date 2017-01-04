@@ -26,7 +26,7 @@
   when: inventory_hostname in hdfs_namenodes
 
 - name: Bootstrap the standby namenode ({{hdfs_namenodes[1]}})
-  shell: baslh -lc "./hdfs namenode -bootstrapStandby; touch {{hdfs_namenode_dir_list[0]}}/.bootstrapped"
+  shell: bash -lc "./hdfs namenode -bootstrapStandby; touch {{hdfs_namenode_dir_list[0]}}/.bootstrapped"
   args:
     creates: "{{hdfs_namenode_dir_list[0]}}/.bootstrapped"
     chdir: "{{ hdfs_bin_dir }}"
@@ -34,7 +34,7 @@
   when: inventory_hostname == hdfs_namenodes[1]
 
 - name: Initialize shared edits from namenode {{hdfs_namenodes[0]}}
-  shell: "./hdfs namenode -initializeSharedEdits; touch {{hdfs_namenode_dir_list[0]}}/.initializedSharedEdits"
+  shell: bash -lc "./hdfs namenode -initializeSharedEdits; touch {{hdfs_namenode_dir_list[0]}}/.initializedSharedEdits"
   args:
     creates: "{{hdfs_namenode_dir_list[0]}}/.initializedSharedEdits"
     chdir: "{{ hdfs_bin_dir }}"
@@ -46,7 +46,7 @@
   when: inventory_hostname == hdfs_namenodes[1]
 
 - name: Format ZK for zkfc
-  shell: "./hdfs zkfc -formatZK -force; touch {{hdfs_namenode_dir_list[0]}}/.zkFormatted"
+  shell: bash -lc "./hdfs zkfc -formatZK -force; touch {{hdfs_namenode_dir_list[0]}}/.zkFormatted"
   args:
     creates: "{{hdfs_namenode_dir_list[0]}}/.zkFormatted"
     chdir: "{{ hdfs_bin_dir }}"

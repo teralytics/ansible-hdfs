@@ -1,5 +1,5 @@
 ---
-- pause: prompt="Are you sure that you want to continue bootstrapping HDFS?"
+- pause: prompt="Are you sure that you want to continue bootstrapping HDFS?" seconds=10
 
 - name: Ensure that zookeeper is running
   service: name=zookeeper state=started
@@ -7,7 +7,7 @@
 
 - name: Ensure that journal nodes are running
   service: name=hdfs-journalnode state=started
-  when: inventory_hostname in hdfs_journal_nodes
+  when: inventory_hostname in hdfs_journalnodes
 
 - name: Format namenode {{hdfs_namenodes[0]}}
   shell: "./hdfs namenode -format {{ hdfs_cluster_name }} -force"

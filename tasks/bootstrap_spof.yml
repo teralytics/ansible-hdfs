@@ -1,5 +1,5 @@
 ---
-- pause: prompt="Are you sure that you want to continue bootstrapping HDFS?"
+- pause: prompt="Are you sure that you want to continue bootstrapping HDFS?" seconds=10
 
 - name: Format namenode {{hdfs_namenodes[0]}}
   shell: "./hdfs namenode -format {{ hdfs_cluster_name }} -force"
@@ -15,11 +15,11 @@
 
 - name: Wait for the namenode {{ hdfs_namenodes[0] }} to come online
   wait_for: host={{ hdfs_namenodes[0] }} port=50070
-  when: inventory_hostname in hdfs_secondarynamenodes
+  when: inventory_hostname in hdfs_secondary_namenode
 
 - name: Start secondary namenode
   service: name=hdfs-secondarynamenode state=started
-  when: inventory_hostname in hdfs_secondarynamenodes
+  when: inventory_hostname in hdfs_secondary_namenode
 
 - name: Start data nodes
   service: name=hdfs-datanode state=started

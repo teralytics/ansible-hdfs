@@ -32,5 +32,5 @@
   service: name=hdfs-secondarynamenode state=restarted
   when:
    - not hdfs_ha_enabled
-   - inventory_hostname in hdfs_secondary_namenodes
+   - inventory_hostname in hdfs_secondary_namenode
    - hdfs_ansible_handlers|bool

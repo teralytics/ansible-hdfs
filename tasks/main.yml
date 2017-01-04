@@ -21,7 +21,7 @@
   tags: namenode
 
 - include: secondarynamenode.yml
-  when: inventory_hostname in hdfs_secondarynamenodes and not hdfs_ha_enabled
+  when: inventory_hostname in hdfs_secondary_namenode and not hdfs_ha_enabled
   tags: secondarynamenode
 
 - include: journalnode.yml

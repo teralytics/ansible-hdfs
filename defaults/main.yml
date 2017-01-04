@@ -5,7 +5,7 @@
 hdfs_cluster_name: cluster1
 hdfs_user: hdfs
 hdfs_group: hadoop
-hdfs_version: 2.7.2
+hdfs_version: 2.7.3
 
 hdfs_java_home: /usr/lib/jvm/java-1.8.0-openjdk-amd64
 
@@ -28,7 +28,7 @@ hdfs_ssh_known_hosts_file: "/home/{{hdfs_user}}/.ssh/known_hosts"
 hdfs_namenodes: "{{ groups.namenodes }}"
 hdfs_hadoop_hosts: "{{ groups.hadoop_hosts }}"
 hdfs_journalnodes: "{{ groups.journalnodes }}"
-hdfs_secondary_namenodes: "{{ groups.secondarynamenode }}"
+hdfs_secondary_namenode: "{{ groups.secondarynamenode if groups.secondarynamenode is defined else [] }}"
 hdfs_datanodes: "{{ groups.datanodes }}"
 hdfs_zookeeper_hosts: "{{ groups.zookeeper_hosts }}"
 

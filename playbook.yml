@@ -1,0 +1,48 @@
+---
+- hosts: all
+  become: True
+  vars:
+      hostgroup: 'all'   # Which group in the ansible inventory should be considered
+      ipaddrnr: 0
+      hosts_file: /etc/hosts
+      hosts_add_default_ipv4: false
+      hosts_add_basic_ipv6: true
+      hosts_add_ansible_managed_hosts: true
+      hosts_network_interface: eth0
+  tasks:
+  - apt: name=dnsmasq state=present
+  - lineinfile: dest=/etc/dnsmasq.conf regexp='^addn-hosts=' line='addn-hosts=/tmp/hosts'
+  - copy: dest=/etc/resolvconf/resolv.conf.d/head content='nameserver 127.0.0.1' owner=root group=root mode=0644
+  - copy: dest=/etc/resolv.conf.head content='nameserver 127.0.0.1' owner=root group=root mode=0644
+  - shell: resolvconf -u
+#  - copy: dest=/etc/resolvconf/resolv.conf.d/docker-hack.conf content='nameserver 127.0.0.1' owner=root group=root mode=0644
+  - name: Generate /etc/hosts from group '{{ hostgroup }}'
+    template: src=hosts.j2 dest=/tmp/hosts owner=root group=root mode=0644 backup=yes
+  - service: name=dnsmasq state=restarted
+#  - file: path="/lib-override" state=directory owner=root group=root
+#  - copy: src="/lib/x86_64-linux-gnu/libnss_files.so.2" dest="/lib-override/libnss_files.so.2" remote_src=true owner=root group=root
+#  - command: perl -pi -e 's:/etc/hosts:/tmp/hosts:g' /lib-override/libnss_files.so.2
+
+#  roles:
+#  - bertvv.hosts
+
+
+- hosts: all
+  become: True
+  pre_tasks:
+  - apt: name=software-properties-common state=present
+  - shell: echo | add-apt-repository ppa:openjdk-r/ppa # echo puts an implicit newline which is needed
+    when: ansible_os_family == "Debian"
+  roles:
+    - {role: "JasonGiedymin.java", when: ansible_os_family == "Debian"}
+
+- hosts: zookeeper_hosts
+  become: True
+  roles:
+  - { role: "teralytics.zookeeper" }
+
+- hosts: hadoop_hosts
+  become: True
+  roles:
+  - ansible-hdfs
+  serial: "{{serial|default(0)}}"

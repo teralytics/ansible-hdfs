@@ -1,0 +1,88 @@
+---
+molecule:
+  test:
+    sequence:
+#      - destroy
+      - create
+      - converge
+      - verify
+      - destroy
+
+ansible:
+  playbook: playbook.yml
+  config_file: ansible.cfg
+  inventory_file: inventory
+  sudo: True
+  verbose: False
+  check: False
+  raw_env_vars:
+      LD_LIBRARY_PATH: /lib-override
+  group_vars:
+    all:
+    - java_version: "8"
+      java_register_alternative: true
+      java_register_env: true
+      use_openjdk_ppa: true
+      java_home: /usr/lib/jvm/java-8-openjdk-amd64
+      hdfs_bootstrap: True
+      zookeeper_version: 3.4.6
+      zookeeper_client_port: "2181"
+      # used by other role defaults (just grep for it)
+      zookeeper_hostnames  : "{{ groups.zookeeper_hosts | join(':' + zookeeper_client_port + ',')  }}:{{ zookeeper_client_port  }}"
+      # used in the role: ansible-zookeepr
+      zookeeper_hosts: "{{groups['zookeeper_hosts']}}"
+
+      # if false: disabled install from apt/deb package (and use tarball install for latest zookeeper version)
+      zookeeper_debian_apt_install: true
+      zookeeper_register_path_env: true
+
+      # custom zookeeper (bin) dir (role default is in /opt )
+      zookeeper_dir: /usr/local/zookeeper-{{zookeeper_version}}
+      zookeeper_tarball_dir: /tmp/
+dependency:
+  name: galaxy
+  requirements_file: requirements.yml
+  options:
+    ignore-certs: True
+    ignore-errors: True
+driver:
+  name: docker
+docker:
+  containers:
+    - name: hdfs1
+      image: rastasheep/ubuntu-sshd
+      image_version: latest
+      privileged: True
+      environment:
+        LD_LIBRARY_PATH: /lib-override
+      ansible_groups:
+        - namenodes
+        - hadoop_hosts
+        - journalnodes
+        - datanodes
+        - zookeeper_hosts
+    - name: hdfs2
+      image: rastasheep/ubuntu-sshd
+      image_version: latest
+      privileged: True
+      environment:
+        LD_LIBRARY_PATH: /lib-override
+      ansible_groups:
+        - namenodes
+        - hadoop_hosts
+        - journalnodes
+        - datanodes
+        - zookeeper_hosts
+    - name: hdfs3
+      image: rastasheep/ubuntu-sshd
+      image_version: latest
+      privileged: True
+      environment:
+        LD_LIBRARY_PATH: /lib-override
+      ansible_groups:
+        - hadoop_hosts
+        - journalnodes
+        - datanodes
+        - zookeeper_hosts
+verifier:
+  name: testinfra

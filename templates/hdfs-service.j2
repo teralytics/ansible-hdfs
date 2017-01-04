@@ -23,17 +23,17 @@ PIDFILE="$HADOOP_PID_DIR/hadoop-${NAME}.pid"
 
 case "$1" in
   start)
-        sudo su - {{hdfs_user}} -c "$HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs start {{program}}"
+        sudo -u {{hdfs_user}} bash -lc "$HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs start {{program}}"
         ;;
   stop)
-        sudo su - {{hdfs_user}} -c "$HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs stop {{program}}"
+        sudo -u {{hdfs_user}} bash -lc "$HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs stop {{program}}"
         ;;
   status)
         status_of_proc -p $PIDFILE "$NAME" "$NAME" && exit 0 || exit $?
         ;;
   restart)
-        sudo su - {{hdfs_user}} -c "$HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs stop {{program}}"
-        sudo su - {{hdfs_user}} -c "$HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs start {{program}}"
+        sudo -u {{hdfs_user}} bash -lc "$HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs stop {{program}}"
+        sudo -u {{hdfs_user}} bash -lc "$HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs start {{program}}"
         ;;
   *)
         echo "Usage: $0 {start|stop|restart}"

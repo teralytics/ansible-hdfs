@@ -1,0 +1,12 @@
+## OpenJDK Java
+- name: JasonGiedymin.java
+  src: JasonGiedymin.java
+
+## Zookeeper
+- src: git+https://github.com/teralytics/ansible-zookeeper
+  name: teralytics.zookeeper
+  version: remotes/origin/master
+
+
+- name: bertvv.hosts
+  src: bertvv.hosts

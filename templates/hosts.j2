@@ -11,7 +11,7 @@
 ## {{ ansible_managed }}
 
 {% for host in groups[ hostgroup ] %}
-{{ hostvars[host].ansible_all_ipv4_addresses[ipaddrnr] }} {{ host }}
+{{ hostvars[host]["ansible_eth0"]["ipv4"]["address"] }} {{ host }}
 {% endfor %}
 
 {% if additional_host_lines is defined %}

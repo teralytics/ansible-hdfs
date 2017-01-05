@@ -10,6 +10,11 @@
   tasks:
   - name: Install dnsmasq
     apt: name=dnsmasq state=present
+  - setup:
+  - debug: msg="{{ ansible_service_mgr }}"
+  - name: check stuff
+    debug: msg="{{ hostvars[item]["ansible_eth0"]["ipv4"]["address"] }}"
+    with_items: "{{ groups.all }}"
   - name: Overwrite nameserver in /etc/resolv.conf
     shell: bash -c "echo 'nameserver 127.0.0.1' > /etc/resolv.conf"
   - name: Generate /etc/hosts from group '{{ hostgroup }}'

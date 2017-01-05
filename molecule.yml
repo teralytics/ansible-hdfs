@@ -3,7 +3,7 @@ molecule:
   test:
     sequence:
 #      - destroy
-      - create
+#      - create
       - converge
       - verify
       - destroy
@@ -25,15 +25,16 @@ ansible:
       use_openjdk_ppa: true
       java_home: /usr/lib/jvm/java-8-openjdk-amd64
       hdfs_bootstrap: True
-      zookeeper_version: 3.4.6
+      hdfs_ssh_fence: False
+      zookeeper_version: 3.4.8
       zookeeper_client_port: "2181"
       # used by other role defaults (just grep for it)
       zookeeper_hostnames  : "{{ groups.zookeeper_hosts | join(':' + zookeeper_client_port + ',')  }}:{{ zookeeper_client_port  }}"
       # used in the role: ansible-zookeepr
-      zookeeper_hosts: "{{groups['zookeeper_hosts']}}"
+      zookeeper_hosts: "{{ groups['zookeeper_hosts'] }}"
 
       # if false: disabled install from apt/deb package (and use tarball install for latest zookeeper version)
-      zookeeper_debian_apt_install: true
+      zookeeper_debian_apt_install: false
       zookeeper_register_path_env: true
 
       # custom zookeeper (bin) dir (role default is in /opt )

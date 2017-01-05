@@ -45,12 +45,16 @@ hdfs_fetch_folder: /tmp/ansible_fetch
 #------------------------------------------------------------------------------
 # HA specific setup
 #------------------------------------------------------------------------------
+# Use ssh as fencing method (other option is shell(/bin/true)
+hdfs_ssh_fence: True
+
 hdfs_ha_enabled: "{{hdfs_namenodes | count > 1}}"
 hdfs_default_name: "hdfs://{{ hdfs_nameservices if hdfs_ha_enabled else hdfs_namenodes[0] + ':8020' }}"
 hdfs_default_fs: "{{hdfs_default_name}}"
 hdfs_nameservices: "{{hdfs_cluster_name}}"
 hdfs_zookeeper_client_port: 2181
 hdfs_zookeeper_quorum: "{{ groups.zookeeper_hosts | join(':' + (hdfs_zookeeper_client_port | string) + ',')  }}:{{ hdfs_zookeeper_client_port | string }}"
+
 
 #------------------------------------------------------------------------------
 # Non-HA specific setup

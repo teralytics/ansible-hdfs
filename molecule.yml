@@ -19,13 +19,12 @@ ansible:
       LD_LIBRARY_PATH: /lib-override
   group_vars:
     all:
-    - java_version: "8"
-      java_register_alternative: true
-      java_register_env: true
-      use_openjdk_ppa: true
-      java_home: /usr/lib/jvm/java-8-openjdk-amd64
+    - java_home: /usr/lib/jvm/java-8-openjdk-amd64
+      java_packages:
+       - openjdk-8-jdk
       hdfs_bootstrap: True
       hdfs_ssh_fence: False
+
       zookeeper_version: 3.4.8
       zookeeper_client_port: "2181"
       # used by other role defaults (just grep for it)

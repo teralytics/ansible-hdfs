@@ -3,7 +3,7 @@
   group: name={{hdfs_group}} state=present
 
 - name: Add hadoop user on first namenode only and generate an ssh key
-  user: name={{hdfs_user}} comment="Hadoop superuser" uid=1040 group={{hdfs_group}} createhome=yes generate_ssh_key=yes
+  user: name={{hdfs_user}} comment="Hadoop superuser" uid=1040 group={{hdfs_group}} createhome=yes generate_ssh_key="{{ hdfs_ssh_fence }}"
   when: inventory_hostname == hdfs_namenodes[0]
 
 - name: Create user on all machines

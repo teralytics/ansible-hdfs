@@ -1,6 +1,6 @@
 ---
 - name: Install some packages needed for native use
-  apt: name={{item}} state=latest update_cache=yes cache_valid_time=3600
+  apt: name={{item}} state=present update_cache=yes cache_valid_time=3600
   with_items:
   - "libssl-dev"
   - "libsnappy-dev"
@@ -21,16 +21,16 @@
   file: src={{hdfs_conf_dir}} dest=/etc/hadoop/conf owner={{hdfs_user}} group={{hdfs_group}} state=link
 
 - name: Create link for hdfs to /usr/local/bin
-  file: src="{{hdfs_bin_dir}}/hdfs" dest=/usr/local/bin/hdfs owner={{hdfs_user}} group={{hdfs_group}} mode=755 state=link
+  file: src="{{hdfs_bin_dir}}/hdfs" dest=/usr/local/bin/hdfs owner={{hdfs_user}} group={{hdfs_group}} mode=0755 state=link
 
 - name: Create link for hadoop to /usr/local/bin
-  file: src="{{hdfs_bin_dir}}/hadoop" dest=/usr/local/bin/hadoop owner={{hdfs_user}} group={{hdfs_group}} mode=755 state=link
+  file: src="{{hdfs_bin_dir}}/hadoop" dest=/usr/local/bin/hadoop owner={{hdfs_user}} group={{hdfs_group}} mode=0755 state=link
 
 - name: Export hadoop variables
   copy: content="export HADOOP_HOME={{hdfs_hadoop_home}}\nexport HADOOP_PREFIX={{hdfs_hadoop_home}}\nexport HADOOP_CONF_DIR={{hdfs_conf_dir}}\nexport HADOOP_LIBEXEC_DIR={{hdfs_hadoop_home}}/libexec" dest="/etc/profile.d/hadoop_exports.sh" mode=0755
 
 - name: Allow hadoop variables keeping for sudoers
-  template: src=hadoop_sudoers.j2 dest=/etc/sudoers.d/hadoop owner=root group=root mode=644
+  template: src=hadoop_sudoers.j2 dest=/etc/sudoers.d/hadoop owner=root group=root mode=0644
 
 - name: Create rack awareness script
   template: src=rack-awareness.sh.j2 dest={{hdfs_rack_script_path}} owner={{hdfs_user}} group={{hdfs_group}} mode=0755

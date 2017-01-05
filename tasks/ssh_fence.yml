@@ -1,5 +1,12 @@
-
+---
 #### only for ssh fence
+- name: Check if ssh keys should be distributed
+  stat: path={{ hdfs_ssh_known_hosts_file }}
+  register: host_file_status
+
+- name: Set distribute keys variable
+  set_fact: distribute_keys={{not host_file_status.stat.exists or hdfs_redistribute_ssh_keys or created_user.changed}}
+
 - name: Fetch private key
   fetch: src=/home/{{hdfs_user}}/.ssh/id_rsa dest=rsa_key
   when: inventory_hostname == hdfs_namenodes[0] and distribute_keys
@@ -9,11 +16,11 @@
   when: inventory_hostname == hdfs_namenodes[0] and distribute_keys
 
 - name: Create .ssh directory for {{hdfs_user}}
-  file: path=/home/{{hdfs_user}}/.ssh state=directory owner={{hdfs_user}} group={{hdfs_group}} mode=700
+  file: path=/home/{{hdfs_user}}/.ssh state=directory owner={{hdfs_user}} group={{hdfs_group}} mode=0700
   when: distribute_keys
 
 - name: Copy private key to all machines
-  copy: src=rsa_key/{{hdfs_namenodes[0]}}/home/{{hdfs_user}}/.ssh/id_rsa dest=/home/{{hdfs_user}}/.ssh/id_rsa owner={{hdfs_user}} group={{hdfs_group}} mode=600
+  copy: src=rsa_key/{{hdfs_namenodes[0]}}/home/{{hdfs_user}}/.ssh/id_rsa dest=/home/{{hdfs_user}}/.ssh/id_rsa owner={{hdfs_user}} group={{hdfs_group}} mode=0600
   when: distribute_keys
 
 - name: Add pubkeys to master server
@@ -21,7 +28,7 @@
   when: distribute_keys
 
 - name: Make sure the known hosts file exists
-  file: path={{ hdfs_ssh_known_hosts_file }} state=touch owner={{hdfs_user}} group={{hdfs_group}} mode=644
+  file: path={{ hdfs_ssh_known_hosts_file }} state=touch owner={{hdfs_user}} group={{hdfs_group}} mode=0644
   when: (not host_file_status.stat.exists) or (distribute_keys and host_file_status.stat.mode == "0644")
   changed_when: (not host_file_status.stat.exists) or host_file_status.stat.mode != "0644"
 
@@ -35,12 +42,10 @@
 
 - name: Scan the public key
   shell: "ssh-keyscan -H -T 10 {{ item.item }} >> {{ hdfs_ssh_known_hosts_file }}"
-  with_items: ssh_known_host_results.results
+  with_items: "{{ ssh_known_host_results.results }}"
   when: item is defined and item.stdout == ""
   no_log: True
 
 - name: Delete key locally
   local_action: file path=rsa_key state=absent
   when: inventory_hostname == hdfs_namenodes[0] and distribute_keys
-
-### ssh fence

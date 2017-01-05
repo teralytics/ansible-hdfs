@@ -10,11 +10,5 @@
   user: name={{hdfs_user}} comment="Hadoop superuser" uid=1040 group={{hdfs_group}} createhome=yes
   register: created_user
 
-- name: Check if ssh keys should be distributed
-  stat: path={{ hdfs_ssh_known_hosts_file }}
-  register: host_file_status
-
-- set_fact: distribute_keys={{not host_file_status.stat.exists or hdfs_redistribute_ssh_keys or created_user.changed}}
-
 - include: ssh_fence.yml
   when: hdfs_ssh_fence and inventory_hostname in hdfs_namenodes

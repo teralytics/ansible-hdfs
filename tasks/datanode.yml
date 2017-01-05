@@ -1,9 +1,10 @@
 ---
 - name: Create datanode directories
-  file: path={{item}} state=directory owner={{hdfs_user}} group={{hdfs_group}} mode={{ hdfs_dfs_datanode_data_dir_perm }} mode=700
-  with_items: hdfs_datanode_dir_list
+  file: path={{item}} state=directory owner={{hdfs_user}} group={{hdfs_group}} mode={{ hdfs_dfs_datanode_data_dir_perm }} mode=0700
+  with_items: "{{ hdfs_datanode_dir_list }}"
 
-- set_fact: program="datanode"
+- name: Set program variable to 'datanode'
+  set_fact: program="datanode"
 
 - name: Deploy init.d service for datanode
   template: src=hdfs-service.j2 dest=/etc/init.d/hdfs-datanode owner=root group=root mode=0755

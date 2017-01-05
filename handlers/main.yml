@@ -1,5 +1,5 @@
 - name: Reload systemd daemon
-  shell: "systemctl daemon-reload"
+  command: "systemctl daemon-reload"
   when: ansible_service_mgr == "systemd"
 
 - name: Restart namenode

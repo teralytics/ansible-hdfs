@@ -32,11 +32,8 @@
 
 - hosts: all
   become: True
-  pre_tasks:
-  - shell: echo | add-apt-repository ppa:openjdk-r/ppa # echo puts an implicit newline which is needed
-    when: ansible_os_family == "Debian"
   roles:
-    - {role: "JasonGiedymin.java", when: ansible_os_family == "Debian"}
+  - role: "geerlingguy.java"
 
 - hosts: zookeeper_hosts
   become: True

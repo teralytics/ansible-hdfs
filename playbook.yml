@@ -10,11 +10,8 @@
   tasks:
   - name: Install dnsmasq
     apt: name=dnsmasq state=present
-  - setup:
-  - debug: msg="{{ ansible_service_mgr }}"
-  - name: check stuff
-    debug: msg="{{ hostvars[item]["ansible_eth0"]["ipv4"]["address"] }}"
-    with_items: "{{ groups.all }}"
+  - name: Redo setup again after dnsmasq was installed
+    setup:
   - name: Overwrite nameserver in /etc/resolv.conf
     shell: bash -c "echo 'nameserver 127.0.0.1' > /etc/resolv.conf"
   - name: Generate /etc/hosts from group '{{ hostgroup }}'
@@ -25,8 +22,6 @@
     lineinfile: dest=/etc/dnsmasq.conf regexp='^server=8.8.8.8' line='server=8.8.8.8'
   - name: Restart dnsmasq
     service: name=dnsmasq state=restarted
-  - name: Install software-properties-common as 'add-apt-repository' is not present in docker container
-    apt: name=software-properties-common state=present
 
 ### End of docker hack
 

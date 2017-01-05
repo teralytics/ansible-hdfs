@@ -18,6 +18,12 @@
 - name: Deploy init.d service for namenode
   template: src=hdfs-service.j2 dest=/etc/init.d/hdfs-namenode owner=root group=root mode=755
   notify: Reload systemd daemon
+  when: ansible_service_mgr != "systemd"
+
+- name: Deploy systemd service for namenode
+  template: src=hdfs.service.j2 dest=/lib/systemd/system/hdfs-namenode.service owner=root group=root mode=0644
+  notify: Reload systemd daemon
+  when: ansible_service_mgr == "systemd"
 
 - name: Register namenode service
   service: name=hdfs-namenode enabled=yes
@@ -28,7 +34,12 @@
 - name: Deploy init.d service for zkfc
   template: src=hdfs-service.j2 dest=/etc/init.d/hdfs-zkfc owner=root group=root mode=755
   notify: Reload systemd daemon
-  when: hdfs_ha_enabled
+  when: hdfs_ha_enabled and ansible_service_mgr != "systemd"
+
+- name: Deploy systemd service for zkfc
+  template: src=hdfs.service.j2 dest=/lib/systemd/system/hdfs-zkfc.service owner=root group=root mode=0644
+  notify: Reload systemd daemon
+  when: hdfs_ha_enabled and ansible_service_mgr == "systemd"
 
 - name: Register zkfc service
   service: name=hdfs-zkfc enabled=yes

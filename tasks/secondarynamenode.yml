@@ -8,6 +8,12 @@
 - name: Deploy init.d service for secondarynamenode
   template: src=hdfs-service.j2 dest=/etc/init.d/hdfs-secondarynamenode owner=root group=root mode=755
   notify: Reload systemd daemon
+  when: ansible_service_mgr != "systemd"
+
+- name: Deploy systemd service for secondarynamenode
+  template: src=hdfs.service.j2 dest=/lib/systemd/system/hdfs-secondarynamenode.service owner=root group=root mode=0644
+  notify: Reload systemd daemon
+  when: ansible_service_mgr == "systemd"
 
 - name: Register secondarynamenode service
   service: name=hdfs-secondarynamenode enabled=yes

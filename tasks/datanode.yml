@@ -8,6 +8,12 @@
 - name: Deploy init.d service for datanode
   template: src=hdfs-service.j2 dest=/etc/init.d/hdfs-datanode owner=root group=root mode=0755
   notify: Reload systemd daemon
+  when: ansible_service_mgr != "systemd"
+
+- name: Deploy systemd service for datanode
+  template: src=hdfs.service.j2 dest=/lib/systemd/system/hdfs-datanode.service owner=root group=root mode=0644
+  notify: Reload systemd daemon
+  when: ansible_service_mgr == "systemd"
 
 - name: Register datanode service
   service: name=hdfs-datanode enabled=yes

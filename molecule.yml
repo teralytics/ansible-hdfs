@@ -2,8 +2,8 @@
 molecule:
   test:
     sequence:
-#      - destroy
-#      - create
+      - destroy
+      - create
       - converge
       - verify
       - destroy
@@ -13,7 +13,7 @@ ansible:
   config_file: ansible.cfg
   inventory_file: inventory
   sudo: True
-  verbose: vv
+  verbose: false
   check: False
   raw_env_vars:
       LD_LIBRARY_PATH: /lib-override
@@ -88,3 +88,5 @@ docker:
         - zookeeper_hosts
 verifier:
   name: testinfra
+  options:
+    verbose: true

@@ -38,6 +38,8 @@
 
 - name: Create hadoop tmp dir
   file: path={{hdfs_tmpdir}} state=directory owner={{hdfs_user}} group={{hdfs_group}} mode=1777
+  tags:
+    - skip_ansible_lint
 
 - name: Create hadoop log dir
   file: path={{hdfs_log_dir}} state=directory owner={{hdfs_user}} group={{hdfs_group}} mode=0755

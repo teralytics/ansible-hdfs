@@ -39,6 +39,8 @@
   register: ssh_known_host_results
   ignore_errors: yes
   changed_when: False
+  tags:
+    - skip_ansible_lint
 
 - name: Scan the public key
   shell: "ssh-keyscan -H -T 10 {{ item.item }} >> {{ hdfs_ssh_known_hosts_file }}"

@@ -4,6 +4,32 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
    '.molecule/inventory').get_hosts('namenodes')
 
 
+def test_hdfs_printTopology_command(Sudo, Command):
+    with Sudo("hdfs"):
+        c = Command("/usr/local/hadoop/bin/hdfs dfsadmin -printTopology")
+
+        assert len(c.stdout.rstrip().split('\n')) == 4
+        assert c.rc == 0
+
+
+def test_hdfs_check_safemode_is_off(Sudo, Command):
+    with Sudo("hdfs"):
+        c = Command("/usr/local/hadoop/bin/hdfs dfsadmin -safemode get")
+
+        assert len(c.stdout.rstrip().split('\n')) == 2
+        for row in c.stdout.rstrip().split('\n'):
+            assert row.find("OFF") != -1
+        assert c.rc == 0
+
+
+def test_hdfs_is_empty(Sudo, Command):
+    with Sudo("hdfs"):
+        c = Command("/usr/local/hadoop/bin/hdfs dfs -ls /")
+
+        assert c.stdout.rstrip() == ''
+        assert c.rc == 0
+
+
 def test_hdfs_namenode_running(Service):
     service = Service('hdfs-namenode')
 

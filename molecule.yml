@@ -33,10 +33,12 @@ ansible:
       zookeeper_hostnames : "{{ groups.zookeeper_hosts | join(':' + zookeeper_client_port + ',')  }}:{{ zookeeper_client_port  }}"
       # used in the role: ansible-zookeepr
       zookeeper_hosts: "{{ groups['zookeeper_hosts'] }}"
-
-      # if false: disabled install from apt/deb package (and use tarball install for latest zookeeper version)
-      zookeeper_debian_apt_install: false
       zookeeper_register_path_env: true
+      zookeeper_debian_apt_install: true
+      zookeeper_debian_apt_repositories:
+       - repository_url: "ppa:ufscar/zookeeper"
+         distro_version: "14.04"
+
 
       # custom zookeeper (bin) dir (role default is in /opt )
       zookeeper_dir: /usr/local/zookeeper-{{zookeeper_version}}

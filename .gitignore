@@ -16,3 +16,4 @@ __pycache__
 rsa_key/
 **/*.pyc
 hadoop-*
+pytestdebug.log

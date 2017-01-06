@@ -8,8 +8,21 @@
 - name: Make sure parent directory exists
   file: path={{hdfs_parent_dir}} state=directory owner=root group=root mode=0755 follow=yes
 
-- name: Copy Hadoop .tgz to {{hdfs_parent_dir}} and unpack it
+- name: Copy Hadoop .tgz to {{hdfs_parent_dir}} and unpack it (from local archive)
   unarchive: src=hadoop-{{hdfs_version}}.tar.gz dest="{{hdfs_parent_dir}}/" owner={{hdfs_user}} group={{hdfs_group}} mode=0755 creates="{{hdfs_hadoop_home}}-{{hdfs_version}}"
+  when: hdfs_distribution_method == "local_file"
+
+- name: Copy Hadoop .tgz to {{hdfs_parent_dir}} and unpack it (from native compiled archive)
+  unarchive: src="{{hdfs_fetch_folder}}/hadoop-{{hdfs_version}}.tar.gz" dest="{{hdfs_parent_dir}}/" owner={{hdfs_user}} group={{hdfs_group}} mode=0755 creates="{{hdfs_hadoop_home}}-{{hdfs_version}}"
+  when: hdfs_distribution_method == "compile"
+
+- name: Download Hadoop .tgz to {{hdfs_parent_dir}}
+  get_url: url={{hdfs_download_url}} dest="{{hdfs_parent_dir}}/hadoop-{{ hdfs_version }}.tar.gz"
+  when: hdfs_distribution_method == "download"
+
+- name: Unarchive downloaded Hadoop
+  unarchive: src="{{hdfs_parent_dir}}/hadoop-{{ hdfs_version }}.tar.gz" dest="{{hdfs_parent_dir}}" remote_src=true creates="{{hdfs_hadoop_home}}-{{ hdfs_version }}"
+  when: hdfs_distribution_method == "download"
 
 - name: Link hadoop version to {{hdfs_hadoop_home}}
   file: src={{hdfs_hadoop_home}}-{{hdfs_version}} dest={{hdfs_hadoop_home}} owner={{hdfs_user}} group={{hdfs_group}} state=link

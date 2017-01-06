@@ -1,10 +1,10 @@
 ---
+- include: user.yml
+  tags: user
+
 - include: native.yml
   when: hdfs_compile_from_source and inventory_hostname == hdfs_compile_node
   tags: native
-
-- include: user.yml
-  tags: user
 
 - include: base.yml
   tags: base

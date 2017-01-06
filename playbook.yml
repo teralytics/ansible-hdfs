@@ -24,8 +24,10 @@
     lineinfile: dest=/etc/dnsmasq.conf regexp='^server=8.8.8.8' line='server=8.8.8.8'
   - name: Restart dnsmasq
     service: name=dnsmasq state=restarted
+  - name: Install netstat for unit tests
+    apt: name=net-tools state=present
 
-### End of docker hack
+## End of docker hack
 
 - hosts: all
   become: True

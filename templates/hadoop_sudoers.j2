@@ -1,0 +1,5 @@
+# Keep environment variables so sudo users can sudo to hdfs user without worrying about environment variables
+Defaults  env_keep += "HADOOP_HOME"
+Defaults  env_keep += "HADOOP_PREFIX"
+Defaults  env_keep += "HADOOP_CONF_DIR"
+Defaults  env_keep += "HADOOP_LIBEXEC_DIR"

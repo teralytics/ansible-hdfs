@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+  <property>
+    <name>fs.default.name</name>
+    <value>{{ hdfs_default_name }}</value>
+  </property>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>{{ hdfs_default_fs }}</value>
+  </property>
+  <property>            
+    <name>hadoop.tmp.dir</name>
+    <value>{{ hdfs_tmpdir_user }}</value>
+  </property>
+  <property>
+    <name>io.serializations</name>
+    <value>org.apache.hadoop.io.serializer.WritableSerialization,org.apache.hadoop.io.serializer.avro.AvroSpecificSerialization,org.apache.hadoop.io.serializer.avro.AvroReflectSerialization</value>
+  </property>
+  <property>
+    <name>fs.trash.interval</name>
+    <value>{{ hdfs_fs_trash_interval }}</value>
+  </property>
+  <property>
+    <name>fs.trash.checkpoint.interval</name>
+    <value>{{ hdfs_fs_trash_checkpoint_interval }}</value>
+  </property>
+{% if hdfs_ha_enabled %}
+  <property>
+    <name>ha.zookeeper.quorum</name>
+    <value>{{ hdfs_zookeeper_quorum }}</value>
+  </property>
+{% endif %}
+{% if hdfs_rack_script_awk is defined %}
+  <property>
+    <name>topology.node.switch.mapping.impl</name>
+    <value>org.apache.hadoop.net.ScriptBasedMapping</value>
+  </property>
+  <property>
+    <name>topology.script.file.name</name>
+    <value>{{ hdfs_rack_script_path }}</value>
+  </property>
+{% endif %}
+{% if core_site_additional_properties is defined %}
+{% for property in core_site_additional_properties %}
+  <property>
+    <name>{{ property.name }}</name>
+    <value>{{ property.value }}</value>
+{% if property.final is defined %}
+    <final>true</final>
+{% endif %}
+  </property>
+{% endfor %}
+{% endif %}
+</configuration>

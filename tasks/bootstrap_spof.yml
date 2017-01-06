@@ -1,0 +1,30 @@
+---
+- pause: prompt="Are you sure that you want to continue bootstrapping HDFS?" seconds=10
+
+- name: Format namenode {{hdfs_namenodes[0]}}
+  shell: "./hdfs namenode -format {{ hdfs_cluster_name }} -force"
+  args:
+    creates: "{{hdfs_namenode_dir_list[0]}}/current/VERSION"
+    chdir: "{{ hdfs_bin_dir }}"
+  become_user: "{{hdfs_user}}"
+  when: inventory_hostname == hdfs_namenodes[0]
+
+- name: Start namenode {{hdfs_namenodes[0]}}
+  service: name=hdfs-namenode state=started
+  when: inventory_hostname == hdfs_namenodes[0]
+
+- name: Wait for the namenode {{ hdfs_namenodes[0] }} to come online
+  wait_for: host={{ hdfs_namenodes[0] }} port=50070
+  when: inventory_hostname in hdfs_secondary_namenode
+
+- name: Start secondary namenode
+  service: name=hdfs-secondarynamenode state=started
+  when: inventory_hostname in hdfs_secondary_namenode
+
+- name: Start data nodes
+  service: name=hdfs-datanode state=started
+  when: inventory_hostname in hdfs_datanodes
+
+- name: Bootstrapping complete
+  debug: "msg='New namenode can be opened at http://{{ inventory_hostname }}:50070/'"
+  when: inventory_hostname in hdfs_namenodes

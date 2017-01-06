@@ -1,0 +1,15 @@
+# Mac OS
+.DS_Store
+
+# IntelliJ Idea generated files
+*.iml
+*.ipr
+.idea_modules/
+.idea/
+*.iws
+.bundle/
+vendor/
+*.retry
+.molecule
+.cache
+__pycache__

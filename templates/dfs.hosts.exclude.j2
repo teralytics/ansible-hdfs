@@ -1,0 +1,6 @@
+# This file contains a list of hosts that will be excluded from the DFS
+{% if dfs_hosts_exclude is defined %}
+{% for host in dfs_hosts_exclude %}
+{{ host }}
+{% endfor %}
+{% endif %}

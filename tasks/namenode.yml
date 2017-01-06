@@ -1,0 +1,35 @@
+---
+- name: Configure mapred-site.xml
+  template: src=mapred-site.xml.j2 dest="{{hdfs_conf_dir}}/mapred-site.xml" owner={{hdfs_user}} group={{hdfs_group}}
+
+- name: Configure slaves
+  template: src=slaves.j2 dest="{{hdfs_conf_dir}}//slaves" owner={{hdfs_user}} group={{hdfs_group}} mode=744
+
+- name: Create namenode directories
+  file: path={{item}} state=directory owner={{hdfs_user}} group={{hdfs_group}} mode=700
+  with_items: hdfs_namenode_dir_list
+
+- name: Create exclude file
+  template: src=dfs.hosts.exclude.j2 dest={{hdfs_conf_dir}}/dfs.hosts.exclude owner={{hdfs_user}} group={{hdfs_group}} mode=700
+  notify: Restart namenode
+
+- set_fact: program="namenode"
+
+- name: Deploy init.d service for namenode
+  template: src=hdfs-service.j2 dest=/etc/init.d/hdfs-namenode owner=root group=root mode=755
+  notify: Reload systemd daemon
+
+- name: Register namenode service
+  service: name=hdfs-namenode enabled=yes
+
+- set_fact: program="zkfc"
+  when: hdfs_ha_enabled
+
+- name: Deploy init.d service for zkfc
+  template: src=hdfs-service.j2 dest=/etc/init.d/hdfs-zkfc owner=root group=root mode=755
+  notify: Reload systemd daemon
+  when: hdfs_ha_enabled
+
+- name: Register zkfc service
+  service: name=hdfs-zkfc enabled=yes
+  when: hdfs_ha_enabled

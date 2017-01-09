@@ -1,13 +1,20 @@
 ---
-- set_fact: program="secondarynamenode"
+- name: Set program variable to 'secondarynamenode'
+  set_fact: program="secondarynamenode"
 
 - name: Create directories for namenode checkpoints
-  file: path={{item}} state=directory owner={{hdfs_user}} group={{hdfs_group}} mode=700
-  with_items: hdfs_namenode_checkpoint_dir_list
+  file: path={{item}} state=directory owner={{hdfs_user}} group={{hdfs_group}} mode=0700
+  with_items: "{{ hdfs_namenode_checkpoint_dir_list }}"
 
 - name: Deploy init.d service for secondarynamenode
-  template: src=hdfs-service.j2 dest=/etc/init.d/hdfs-secondarynamenode owner=root group=root mode=755
+  template: src=hdfs-service.j2 dest=/etc/init.d/hdfs-secondarynamenode owner=root group=root mode=0755
   notify: Reload systemd daemon
+  when: ansible_service_mgr != "systemd"
+
+- name: Deploy systemd service for secondarynamenode
+  template: src=hdfs.service.j2 dest=/lib/systemd/system/hdfs-secondarynamenode.service owner=root group=root mode=0644
+  notify: Reload systemd daemon
+  when: ansible_service_mgr == "systemd"
 
 - name: Register secondarynamenode service
   service: name=hdfs-secondarynamenode enabled=yes

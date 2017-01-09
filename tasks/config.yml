@@ -23,7 +23,7 @@
    - hdfs-core-config
 
 - name: Configure hdfs-site.xml
-  template: src=hdfs-site.xml.j2 dest={{hdfs_conf_dir}}/hdfs-site.xml owner={{hdfs_user}} group={{hdfs_group}}
+  template: src=hdfs-site.xml.j2 dest={{hdfs_conf_dir}}/hdfs-site.xml owner={{hdfs_user}} group={{hdfs_group}} mode=0755
   notify:
    - Restart namenode
    - Restart secondary namenode
@@ -34,7 +34,7 @@
    - hdfs-site-config
 
 - name: Configure log4j.properties
-  template: src=log4j.properties.j2 dest={{hdfs_conf_dir}}/log4j.properties owner={{hdfs_user}} group={{hdfs_group}}
+  template: src=log4j.properties.j2 dest={{hdfs_conf_dir}}/log4j.properties owner={{hdfs_user}} group={{hdfs_group}} mode=0755
   notify:
    - Restart namenode
    - Restart secondary namenode

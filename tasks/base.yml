@@ -1,6 +1,6 @@
 ---
 - name: Install some packages needed for native use
-  apt: name={{item}} state=latest update_cache=yes cache_valid_time=3600
+  apt: name={{item}} state=present update_cache=yes cache_valid_time=3600
   with_items:
   - "libssl-dev"
   - "libsnappy-dev"
@@ -8,8 +8,21 @@
 - name: Make sure parent directory exists
   file: path={{hdfs_parent_dir}} state=directory owner=root group=root mode=0755 follow=yes
 
-- name: Copy Hadoop .tgz to {{hdfs_parent_dir}} and unpack it
+- name: Copy Hadoop .tgz to {{hdfs_parent_dir}} and unpack it (from local archive)
   unarchive: src=hadoop-{{hdfs_version}}.tar.gz dest="{{hdfs_parent_dir}}/" owner={{hdfs_user}} group={{hdfs_group}} mode=0755 creates="{{hdfs_hadoop_home}}-{{hdfs_version}}"
+  when: hdfs_distribution_method == "local_file"
+
+- name: Copy Hadoop .tgz to {{hdfs_parent_dir}} and unpack it (from native compiled archive)
+  unarchive: src="{{hdfs_fetch_folder}}/hadoop-{{hdfs_version}}.tar.gz" dest="{{hdfs_parent_dir}}/" owner={{hdfs_user}} group={{hdfs_group}} mode=0755 creates="{{hdfs_hadoop_home}}-{{hdfs_version}}"
+  when: hdfs_distribution_method == "compile"
+
+- name: Download Hadoop .tgz to {{hdfs_parent_dir}}
+  get_url: url={{hdfs_download_url}} dest="{{hdfs_parent_dir}}/hadoop-{{ hdfs_version }}.tar.gz"
+  when: hdfs_distribution_method == "download"
+
+- name: Unarchive downloaded Hadoop
+  unarchive: src="{{hdfs_parent_dir}}/hadoop-{{ hdfs_version }}.tar.gz" dest="{{hdfs_parent_dir}}" remote_src=true creates="{{hdfs_hadoop_home}}-{{ hdfs_version }}"
+  when: hdfs_distribution_method == "download"
 
 - name: Link hadoop version to {{hdfs_hadoop_home}}
   file: src={{hdfs_hadoop_home}}-{{hdfs_version}} dest={{hdfs_hadoop_home}} owner={{hdfs_user}} group={{hdfs_group}} state=link
@@ -21,16 +34,16 @@
   file: src={{hdfs_conf_dir}} dest=/etc/hadoop/conf owner={{hdfs_user}} group={{hdfs_group}} state=link
 
 - name: Create link for hdfs to /usr/local/bin
-  file: src="{{hdfs_bin_dir}}/hdfs" dest=/usr/local/bin/hdfs owner={{hdfs_user}} group={{hdfs_group}} mode=755 state=link
+  file: src="{{hdfs_bin_dir}}/hdfs" dest=/usr/local/bin/hdfs owner={{hdfs_user}} group={{hdfs_group}} mode=0755 state=link
 
 - name: Create link for hadoop to /usr/local/bin
-  file: src="{{hdfs_bin_dir}}/hadoop" dest=/usr/local/bin/hadoop owner={{hdfs_user}} group={{hdfs_group}} mode=755 state=link
+  file: src="{{hdfs_bin_dir}}/hadoop" dest=/usr/local/bin/hadoop owner={{hdfs_user}} group={{hdfs_group}} mode=0755 state=link
 
 - name: Export hadoop variables
   copy: content="export HADOOP_HOME={{hdfs_hadoop_home}}\nexport HADOOP_PREFIX={{hdfs_hadoop_home}}\nexport HADOOP_CONF_DIR={{hdfs_conf_dir}}\nexport HADOOP_LIBEXEC_DIR={{hdfs_hadoop_home}}/libexec" dest="/etc/profile.d/hadoop_exports.sh" mode=0755
 
 - name: Allow hadoop variables keeping for sudoers
-  template: src=hadoop_sudoers.j2 dest=/etc/sudoers.d/hadoop owner=root group=root mode=644
+  template: src=hadoop_sudoers.j2 dest=/etc/sudoers.d/hadoop owner=root group=root mode=0644
 
 - name: Create rack awareness script
   template: src=rack-awareness.sh.j2 dest={{hdfs_rack_script_path}} owner={{hdfs_user}} group={{hdfs_group}} mode=0755
@@ -38,6 +51,8 @@
 
 - name: Create hadoop tmp dir
   file: path={{hdfs_tmpdir}} state=directory owner={{hdfs_user}} group={{hdfs_group}} mode=1777
+  tags:
+    - skip_ansible_lint
 
 - name: Create hadoop log dir
   file: path={{hdfs_log_dir}} state=directory owner={{hdfs_user}} group={{hdfs_group}} mode=0755

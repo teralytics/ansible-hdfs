@@ -53,6 +53,7 @@
     <name>dfs.client.failover.proxy.provider.{{ hdfs_nameservices }}</name>
     <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
   </property>
+{% if hdfs_ssh_fence %}
   <property>
     <name>dfs.ha.fencing.methods</name>
     <value>sshfence</value>
@@ -61,6 +62,12 @@
     <name>dfs.ha.fencing.ssh.private-key-files</name>
     <value>/home/{{ hdfs_user }}/.ssh/id_rsa</value>
   </property>
+{% else %}
+  <property>
+      <name>dfs.ha.fencing.methods</name>
+      <value>shell(/bin/true)</value>
+  </property>
+{% endif %}
   <property>
     <name>dfs.ha.automatic-failover.enabled</name>
     <value>true</value>

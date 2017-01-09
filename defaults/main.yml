@@ -23,6 +23,13 @@ hdfs_parent_dir: /usr/local  # hadoop binaries will be copied here
 hdfs_ssh_known_hosts_file: "/home/{{hdfs_user}}/.ssh/known_hosts"
 
 #------------------------------------------------------------------------------
+# Hadoop installation source
+#------------------------------------------------------------------------------
+hdfs_distribution_method: "download"   # Method to use for archive installation ("download", "local_file" or "compile")
+hdfs_download_url: "http://mirror.switch.ch/mirror/apache/dist/hadoop/common/hadoop-{{ hdfs_version }}/hadoop-{{ hdfs_version }}.tar.gz"
+hdfs_local_archive_path: "./"
+
+#------------------------------------------------------------------------------
 # Hadoop host variables
 #------------------------------------------------------------------------------
 hdfs_namenodes: "{{ groups.namenodes }}"
@@ -32,11 +39,10 @@ hdfs_secondary_namenode: "{{ groups.secondarynamenode if groups.secondarynamenod
 hdfs_datanodes: "{{ groups.datanodes }}"
 hdfs_zookeeper_hosts: "{{ groups.zookeeper_hosts }}"
 
-
 #------------------------------------------------------------------------------
 # Hadoop native libraries (experimental)
 #------------------------------------------------------------------------------
-hdfs_compile_from_source: False
+hdfs_compile_from_source: "{{ hdfs_distribution_method == 'compile' }}"
 hdfs_compile_node: "{{ hdfs_namenodes[0] }}"
 hdfs_compile_from_git: True
 hdfs_compile_version: "tags/rel/release-{{hdfs_version}}"
@@ -45,12 +51,16 @@ hdfs_fetch_folder: /tmp/ansible_fetch
 #------------------------------------------------------------------------------
 # HA specific setup
 #------------------------------------------------------------------------------
+# Use ssh as fencing method (other option is shell(/bin/true)
+hdfs_ssh_fence: True
+
 hdfs_ha_enabled: "{{hdfs_namenodes | count > 1}}"
 hdfs_default_name: "hdfs://{{ hdfs_nameservices if hdfs_ha_enabled else hdfs_namenodes[0] + ':8020' }}"
 hdfs_default_fs: "{{hdfs_default_name}}"
 hdfs_nameservices: "{{hdfs_cluster_name}}"
 hdfs_zookeeper_client_port: 2181
-hdfs_zookeeper_quorum: "{{ groups.zookeeper_hosts | join(':' + (hdfs_zookeeper_client_port | string) + ',')  }}:{{ hdfs_zookeeper_client_port | string }}"
+hdfs_zookeeper_quorum: "{{ hdfs_zookeeper_hosts | join(':' + (hdfs_zookeeper_client_port | string) + ',')  }}:{{ hdfs_zookeeper_client_port | string }}"
+
 
 #------------------------------------------------------------------------------
 # Non-HA specific setup

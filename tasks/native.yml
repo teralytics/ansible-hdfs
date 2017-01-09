@@ -3,7 +3,7 @@
   file: path={{hdfs_parent_dir}} state=directory owner=root group=root mode=0755 follow=yes
 
 - name: Install some tools
-  apt: name={{item}} state=latest update_cache=yes
+  apt: name={{item}} state=present update_cache=yes
   with_items:
   - "git"
   - "maven"
@@ -33,10 +33,11 @@
   file: path="{{hdfs_hadoop_home}}-{{hdfs_version}}-src" owner={{hdfs_user}} group={{hdfs_group}} recurse=yes
 
 - name: Compile
-  shell: mvn package -Pdist,native -DskipTests -Dtar -e -Drequire.snappy -Drequire.bzip2
+  command: mvn package -Pdist,native -DskipTests -Dtar -e -Drequire.snappy -Drequire.bzip2
   args:
     chdir: "{{hdfs_hadoop_home}}-{{hdfs_version}}-src"
     creates: "{{hdfs_hadoop_home}}-{{hdfs_version}}-src/hadoop-dist/target/hadoop-{{hdfs_version}}.tar.gz"
+  become: true
   become_user: "{{hdfs_user}}"
 
 - name: Fetch hadoop-{{hdfs_version}}.tar.gz to {{hdfs_fetch_folder}}

@@ -1,11 +1,13 @@
 ---
-- pause: prompt="Are you sure that you want to continue bootstrapping HDFS?" seconds=10
+- name: Pause - Bootstrapping is about to begin
+  pause: prompt="Are you sure that you want to continue bootstrapping HDFS?" seconds=10
 
 - name: Format namenode {{hdfs_namenodes[0]}}
-  shell: "./hdfs namenode -format {{ hdfs_cluster_name }} -force"
+  command: "./hdfs namenode -format {{ hdfs_cluster_name }} -force"
   args:
     creates: "{{hdfs_namenode_dir_list[0]}}/current/VERSION"
     chdir: "{{ hdfs_bin_dir }}"
+  become: true
   become_user: "{{hdfs_user}}"
   when: inventory_hostname == hdfs_namenodes[0]
 

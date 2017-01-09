@@ -6,4 +6,4 @@
 ## Zookeeper
 - src: git+https://github.com/teralytics/ansible-zookeeper
   name: teralytics.zookeeper
-  version: tags/0.17.0
+  version: tags/v0.17.0

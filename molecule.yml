@@ -30,9 +30,9 @@ ansible:
     - zookeeper_version: 3.4.8
       zookeeper_client_port: "2181"
       # used by other role defaults (just grep for it)
-      zookeeper_hostnames : "{{ groups.zookeeper_hosts | join(':' + zookeeper_client_port + ',')  }}:{{ zookeeper_client_port  }}"
+      zookeeper_hostnames : "{{ hdfs_zookeeper_hosts | join(':' + zookeeper_client_port + ',')  }}:{{ zookeeper_client_port  }}"
       # used in the role: ansible-zookeepr
-      zookeeper_hosts: "{{ groups['zookeeper_hosts'] }}"
+      zookeeper_hosts: "{{ hdfs_zookeeper_hosts }}"
       zookeeper_register_path_env: true
       zookeeper_debian_apt_install: true
       zookeeper_debian_apt_repositories:

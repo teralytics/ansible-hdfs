@@ -59,7 +59,7 @@ hdfs_default_name: "hdfs://{{ hdfs_nameservices if hdfs_ha_enabled else hdfs_nam
 hdfs_default_fs: "{{hdfs_default_name}}"
 hdfs_nameservices: "{{hdfs_cluster_name}}"
 hdfs_zookeeper_client_port: 2181
-hdfs_zookeeper_quorum: "{{ groups.zookeeper_hosts | join(':' + (hdfs_zookeeper_client_port | string) + ',')  }}:{{ hdfs_zookeeper_client_port | string }}"
+hdfs_zookeeper_quorum: "{{ hdfs_zookeeper_hosts | join(':' + (hdfs_zookeeper_client_port | string) + ',')  }}:{{ hdfs_zookeeper_client_port | string }}"
 
 
 #------------------------------------------------------------------------------

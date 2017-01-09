@@ -22,6 +22,7 @@ ansible:
     - java_home: /usr/lib/jvm/java-8-openjdk-amd64
       java_packages:
        - openjdk-8-jdk
+      java_openjdk_ppa_repos_support: true
 
       hdfs_bootstrap: True
       hdfs_ansible_handlers: False

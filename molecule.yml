@@ -6,6 +6,7 @@ molecule:
       - create
       - converge
       - verify
+      - idempotence
       - destroy
 
 ansible:
@@ -15,8 +16,6 @@ ansible:
   sudo: True
   verbose: false
   check: False
-  raw_env_vars:
-      LD_LIBRARY_PATH: /lib-override
   group_vars:
     all:
     - java_home: /usr/lib/jvm/java-8-openjdk-amd64
@@ -30,15 +29,14 @@ ansible:
     - zookeeper_version: 3.4.8
       zookeeper_client_port: "2181"
       # used by other role defaults (just grep for it)
-      zookeeper_hostnames : "{{ hdfs_zookeeper_hosts | join(':' + zookeeper_client_port + ',')  }}:{{ zookeeper_client_port  }}"
+      zookeeper_hostnames : "{{ groups.zookeeper_hosts | join(':' + zookeeper_client_port + ',')  }}:{{ zookeeper_client_port  }}"
       # used in the role: ansible-zookeepr
-      zookeeper_hosts: "{{ hdfs_zookeeper_hosts }}"
+      zookeeper_hosts: "{{ groups.zookeeper_hosts }}"
       zookeeper_register_path_env: true
       zookeeper_debian_apt_install: true
       zookeeper_debian_apt_repositories:
        - repository_url: "ppa:ufscar/zookeeper"
          distro_version: "14.04"
-
 
       # custom zookeeper (bin) dir (role default is in /opt )
       zookeeper_dir: /usr/local/zookeeper-{{zookeeper_version}}
@@ -57,8 +55,6 @@ docker:
       image: solita/ubuntu-systemd
       image_version: 16.04
       privileged: True
-      environment:
-        LD_LIBRARY_PATH: /lib-override
       ansible_groups:
         - namenodes
         - hadoop_hosts
@@ -69,8 +65,6 @@ docker:
       image: solita/ubuntu-systemd
       image_version: 16.04
       privileged: True
-      environment:
-        LD_LIBRARY_PATH: /lib-override
       ansible_groups:
         - namenodes
         - hadoop_hosts
@@ -81,8 +75,6 @@ docker:
       image: solita/ubuntu-systemd
       image_version: 16.04
       privileged: True
-      environment:
-        LD_LIBRARY_PATH: /lib-override
       ansible_groups:
         - hadoop_hosts
         - journalnodes

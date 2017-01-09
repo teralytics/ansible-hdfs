@@ -1,13 +1,9 @@
-## OpenJDK Java
-#- name: JasonGiedymin.java
-#  src: JasonGiedymin.java
-
-- name: geerlingguy.java
-#  src: geerlingguy.java
-  src: git+https://github.com/geerlingguy/ansible-role-java
-  version: tags/1.7.2
+## Java Open JDK
+- name: lhoss.java
+  src: git+https://github.com/lhoss/ansible-role-java
+  version: remotes/origin/support_configurable_ppa_repositories_per_distro
 
 ## Zookeeper
 - src: git+https://github.com/teralytics/ansible-zookeeper
   name: teralytics.zookeeper
-  version: remotes/origin/support_custom_zookeeper_debian_apt_repository
+  version: tags/0.17.0

@@ -36,7 +36,7 @@
 - hosts: all
   become: True
   roles:
-  - role: "geerlingguy.java"
+  - role: "lhoss.java"
 
 - hosts: zookeeper_hosts
   become: True

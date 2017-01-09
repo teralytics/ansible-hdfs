@@ -20,10 +20,14 @@
     template: src=hosts.j2 dest=/tmp/hosts owner=root group=root mode=0644 backup=yes
   - name: Add /tmp/hosts to dnsmasq.conf
     lineinfile: dest=/etc/dnsmasq.conf regexp='^addn-hosts=' line='addn-hosts=/tmp/hosts'
+    register: dnsmasqconf_changed
   - name: Add server 8.8.8.8 to dnsmasq.conf
     lineinfile: dest=/etc/dnsmasq.conf regexp='^server=8.8.8.8' line='server=8.8.8.8'
   - name: Restart dnsmasq
     service: name=dnsmasq state=restarted
+    when: dnsmasqconf_changed.changed
+    tags:
+      - skip_ansible_lint
   - name: Install netstat for unit tests
     apt: name=net-tools state=present
 

@@ -15,7 +15,7 @@ This role installs HDFS on Ubuntu/Debian Linux servers.
   - hdfs
 ```
 
-For an example inventory please check the ```inventory``` file.
+For an example inventory please check the [inventory](https://github.com/teralytics/ansible-hdfs/blob/master/inventory) file.
 
 If ```hdfs_ssh_fence``` is set to ```true``` the playbook has to be run with the ```-K``` option of ansible-playbook!
 
@@ -40,7 +40,7 @@ This role makes use of groups to figure out which server needs which installatio
 * zookeeper_hosts (High availability mode only)
 * journalnodes (High availability mode only)
 
-Alternatively variables like ```hdfs_namenodes``` can be overwritten (see ```default.yml```).
+Alternatively variables like ```hdfs_namenodes``` can be overwritten (see [defaults/main.yml](https://github.com/teralytics/ansible-hdfs/blob/master/defaults/main.yml)).
 
 #### Important variables:
 The following gives a list of important variables that have to be set for a specific deployment. Most variables can be set in *group_vars* or *host_vars*.
@@ -52,7 +52,7 @@ The following gives a list of important variables that have to be set for a spec
 * ```hdfs_namenode_dir_list```: Files of namenodes
 * ```hdfs_datanode_dir_list```: Files of datanodes
 * ```hdfs_namenode_checkpoint_dir_list```: Files of secondary namenode
-* ```hdfs_distribution_method```: Should tar.gz be downloaded, local_file or native install?
+* ```hdfs_distribution_method```: Should tar.gz be 'downloaded', 'local_file' or 'compile' install?
 * ```hdfs_bootstrap```: Should the cluster be formatted? (If you have an already existing installation this option is not recommended)
 
 For more configuration variables see the documentation in [defaults/main.yml](https://github.com/teralytics/ansible-hdfs/blob/master/defaults/main.yml).
@@ -72,7 +72,7 @@ CURRENTLY ONLY WORKS WITH Ubuntu 14.04. (16.04. has a newer protobuf version and
 This playbook will compile hadoop on server *hdfs_compile_node* to enable [hadoop native libraries](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/NativeLibraries.html) (Compression codecs and [HDFS Short-Circuit Local Reads](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/ShortCircuitLocalReads.html)).
 This playbook will install the development tools necessary to be able to compile hadoop. (Download and compilation may take a while depending on you internet connection and server power (10-20 min))
 
-To activate this playbook enable set ```hdfs_distribution_method``` to ```download```.
+To activate this playbook enable set ```hdfs_distribution_method``` to ```compile```.
 
 Known issues: 
 
@@ -116,7 +116,7 @@ This playbook bootstraps a cluster in HA mode
 This playbook bootstraps a cluster in SPOF mode. (One namenode and one secondary namenode)
 
 ### Testing
-The tests are run using molecule and a docker container.
+The tests are run using [molecule](https://github.com/metacloud/molecule) and a docker container.
 
 ##### Requirements:
 - Docker

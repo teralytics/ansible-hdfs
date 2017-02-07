@@ -14,7 +14,7 @@ ansible:
   config_file: ansible.cfg
   inventory_file: inventory
   become: True
-  verbose: v
+  verbose: False
   check: False
   group_vars:
     all:

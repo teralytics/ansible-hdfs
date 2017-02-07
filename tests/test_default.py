@@ -70,4 +70,5 @@ def test_hdfs_journal_running(Service):
 
 def test_hdfs_datanode_web_listening(Socket):
     socket = Socket('tcp://0.0.0.0:50075')
+
     assert socket.is_listening

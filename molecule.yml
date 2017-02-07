@@ -13,8 +13,8 @@ ansible:
   playbook: playbook.yml
   config_file: ansible.cfg
   inventory_file: inventory
-  sudo: True
-  verbose: false
+  become: True
+  verbose: v
   check: False
   group_vars:
     all:

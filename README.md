@@ -1,4 +1,6 @@
 ## HDFS
+[![Build Status](https://travis-ci.org/teralytics/ansible-hdfs.svg?branch=master)](https://travis-ci.org/teralytics/ansible-hdfs)
+
 
 ### Introduction
 This role installs HDFS on Ubuntu/Debian Linux servers.

@@ -1,5 +1,5 @@
 ## HDFS
-[![Build Status](https://travis-ci.org/lhoss/ansible-hdfs.svg?branch=master)](https://travis-ci.org/lhoss/ansible-hdfs)
+[![Build Status](https://travis-ci.org/teralytics/ansible-hdfs.svg?branch=master)](https://travis-ci.org/teralytics/ansible-hdfs)
 
 
 ### Introduction

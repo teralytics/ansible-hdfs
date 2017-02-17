@@ -1,5 +1,14 @@
 ---
 ## The following section is a hack to get this role running in docker containers
+- hosts: all
+  become: false
+  tasks:
+# following requires ansible v2.2:
+  - name: "Create a custom bridge network (to ensure dns/autodiscovery for our docker cluster)"
+    docker_network:
+      name: "isolated_nw"
+    delegate_to: localhost
+    run_once: yes
 
 - hosts: all
   become: True
@@ -8,31 +17,10 @@
       ipaddrnr: 0
       hosts_file: /etc/hosts
   tasks:
-  - name: Install dnsmasq
-    apt: name=dnsmasq state=present
-  - name: Redo setup again after dnsmasq was installed
-    setup:
-  - name: Overwrite nameserver in /etc/resolv.conf
-    shell: bash -c "echo 'nameserver 127.0.0.1' > /etc/resolv.conf" && touch /etc/changedResolv
-    args:
-      creates: /etc/changedResolv
-  - name: Generate /etc/hosts from group '{{ hostgroup }}'
-    template: src=hosts.j2 dest=/tmp/hosts owner=root group=root mode=0644 backup=yes
-  - name: Add /tmp/hosts to dnsmasq.conf
-    lineinfile: dest=/etc/dnsmasq.conf regexp='^addn-hosts=' line='addn-hosts=/tmp/hosts'
-    register: dnsmasqconf_changed
-  - name: Add server 8.8.8.8 to dnsmasq.conf
-    lineinfile: dest=/etc/dnsmasq.conf regexp='^server=8.8.8.8' line='server=8.8.8.8'
-  - name: Restart dnsmasq
-    service: name=dnsmasq state=restarted
-    when: dnsmasqconf_changed.changed
-    tags:
-      - skip_ansible_lint
   - name: Install netstat for unit tests
     apt: name=net-tools state=present
 
 ## End of docker hack
-
 - hosts: all
   become: True
   roles:

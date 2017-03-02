@@ -7,12 +7,14 @@
 
 - name: Deploy init.d service for journalnode
   template: src=hdfs-service.j2 dest=/etc/init.d/hdfs-journalnode owner=root group=root mode=0755
-  notify: Reload systemd daemon
   when: ansible_service_mgr != "systemd"
 
 - name: Deploy systemd service for journalnode
   template: src=hdfs.service.j2 dest=/lib/systemd/system/hdfs-journalnode.service owner=root group=root mode=0644
-  notify: Reload systemd daemon
+  when: ansible_service_mgr == "systemd"
+
+- name: Reload systemd daemon
+  command: "systemctl daemon-reload"
   when: ansible_service_mgr == "systemd"
 
 - name: Register journalnode service

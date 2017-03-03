@@ -39,6 +39,7 @@
 - name: Reload systemd daemon
   command: "systemctl daemon-reload"
   when: ansible_service_mgr == "systemd"
+  changed_when: false
 
 - name: Register namenode service
   service: name=hdfs-namenode enabled=yes

@@ -1,7 +1,7 @@
 import testinfra.utils.ansible_runner
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
-   '.molecule/inventory').get_hosts('namenodes')
+    '.molecule/inventory').get_hosts('namenodes')
 
 
 def test_hdfs_printTopology_command(Sudo, Command):

@@ -1,7 +1,7 @@
 import testinfra.utils.ansible_runner
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
-   '.molecule/inventory').get_hosts('all')
+    '.molecule/inventory').get_hosts('all')
 
 
 def get(e, nodeName):

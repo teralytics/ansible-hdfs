@@ -22,6 +22,7 @@
 
 - name: Deploy systemd service for namenode
   template: src=hdfs.service.j2 dest=/lib/systemd/system/hdfs-namenode.service owner=root group=root mode=0644
+  register: namenode_systemd_unit_altered
   when: ansible_service_mgr == "systemd"
 
 - name: Set program variable to 'zkfc'
@@ -30,6 +31,7 @@
 
 - name: Deploy init.d service for zkfc
   template: src=hdfs-service.j2 dest=/etc/init.d/hdfs-zkfc owner=root group=root mode=0755
+  register: zkfc_systemd_unit_altered
   when: hdfs_ha_enabled and ansible_service_mgr != "systemd"
 
 - name: Deploy systemd service for zkfc
@@ -38,7 +40,7 @@
 
 - name: Reload systemd daemon
   command: "systemctl daemon-reload"
-  when: ansible_service_mgr == "systemd"
+  when: ansible_service_mgr == "systemd" and ( namenode_systemd_unit_altered.changed or zkfc_systemd_unit_altered.changed )
   changed_when: false
 
 - name: Register namenode service

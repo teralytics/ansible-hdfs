@@ -12,11 +12,12 @@
 
 - name: Deploy systemd service for secondarynamenode
   template: src=hdfs.service.j2 dest=/lib/systemd/system/hdfs-secondarynamenode.service owner=root group=root mode=0644
+  register: secondarynamenode_systemd_unit_altered
   when: ansible_service_mgr == "systemd"
 
 - name: Reload systemd daemon
   command: "systemctl daemon-reload"
-  when: ansible_service_mgr == "systemd"
+  when: ansible_service_mgr == "systemd" and secondarynamenode_systemd_unit_altered.changed
   changed_when: false
 
 - name: Register secondarynamenode service

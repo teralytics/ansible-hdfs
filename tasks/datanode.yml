@@ -19,6 +19,8 @@
   command: "systemctl daemon-reload"
   when: ansible_service_mgr == "systemd" and datanode_systemd_unit_altered.changed
   changed_when: false
+  tags:
+    - skip_ansible_lint
 
 - name: Register datanode service
   service: name=hdfs-datanode enabled=yes

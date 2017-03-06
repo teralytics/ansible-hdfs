@@ -18,6 +18,8 @@
   command: "systemctl daemon-reload"
   when: ansible_service_mgr == "systemd" and journalnode_systemd_unit_altered.changed
   changed_when: false
+  tags:
+    - skip_ansible_lint
 
 - name: Register journalnode service
   service: name=hdfs-journalnode enabled=yes

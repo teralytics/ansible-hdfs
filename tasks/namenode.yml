@@ -38,10 +38,11 @@
   template: src=hdfs.service.j2 dest=/lib/systemd/system/hdfs-zkfc.service owner=root group=root mode=0644
   when: hdfs_ha_enabled and ansible_service_mgr == "systemd"
 
+# daemon-reload cannot be sent to handler because it is needed before the end of play
+# also, we cannot use flush_handlers before the end of play, because we have other handlers
 - name: Reload systemd daemon
   command: "systemctl daemon-reload"
   when: ansible_service_mgr == "systemd" and ( namenode_systemd_unit_altered.changed or zkfc_systemd_unit_altered.changed )
-  changed_when: false
   tags:
     - skip_ansible_lint
 

@@ -17,7 +17,7 @@
   when: hdfs_distribution_method == "compile"
 
 - name: Download Hadoop .tgz to {{hdfs_parent_dir}}
-  get_url: url={{hdfs_download_url}} dest="{{hdfs_parent_dir}}/hadoop-{{ hdfs_version }}.tar.gz"
+  get_url: url={{hdfs_download_url}} dest="{{hdfs_parent_dir}}/hadoop-{{ hdfs_version }}.tar.gz" validate_certs=no
   when: hdfs_distribution_method == "download"
 
 - name: Unarchive downloaded Hadoop

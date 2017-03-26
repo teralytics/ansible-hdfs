@@ -8,13 +8,20 @@
 
 - name: Deploy init.d service for datanode
   template: src=hdfs-service.j2 dest=/etc/init.d/hdfs-datanode owner=root group=root mode=0755
-  notify: Reload systemd daemon
   when: ansible_service_mgr != "systemd"
 
 - name: Deploy systemd service for datanode
   template: src=hdfs.service.j2 dest=/lib/systemd/system/hdfs-datanode.service owner=root group=root mode=0644
-  notify: Reload systemd daemon
+  register: datanode_systemd_unit_altered
   when: ansible_service_mgr == "systemd"
+
+# daemon-reload cannot be sent to handler because it is needed before the end of play
+# also, we cannot use flush_handlers before the end of play, because we have other handlers
+- name: Reload systemd daemon
+  command: "systemctl daemon-reload"
+  when: ansible_service_mgr == "systemd" and datanode_systemd_unit_altered.changed
+  tags:
+    - skip_ansible_lint
 
 - name: Register datanode service
   service: name=hdfs-datanode enabled=yes

@@ -10,9 +10,12 @@ before_install:
 
 # use ansible v2.2.0, as v2.2.1 has bad bug: https://github.com/ansible/ansible/issues/20392
 # require molecule v>1.20 (due to breaking change with group_vars)
+# Note: molecule >1.21 requires 'docker-py' replaced by newer 'docker' module
+# -> Details: http://molecule.readthedocs.io/en/stable-1.21/changelog.html#breaking-changes
 install:
 - pip install ansible==2.2.0.0
-- pip install molecule docker-py
+- pip install molecule==1.20.3
+- pip install docker-py
 
 script:
 - molecule --version

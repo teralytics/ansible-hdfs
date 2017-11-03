@@ -45,7 +45,7 @@
 - name: Scan the public key
   shell: "ssh-keyscan -H -T 10 {{ item.item }} >> {{ hdfs_ssh_known_hosts_file }}"
   with_items: "{{ ssh_known_host_results.results }}"
-  when: item is defined and item.stdout == ""
+  when: item.stdout is defined and item.stdout == ""
   no_log: True
 
 - name: Delete key locally

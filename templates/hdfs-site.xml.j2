@@ -60,7 +60,7 @@
   </property>
    <property>
     <name>dfs.ha.fencing.ssh.private-key-files</name>
-    <value>/home/{{ hdfs_user }}/.ssh/id_rsa</value>
+    <value>{{ hdfs_user_home }}/.ssh/id_rsa</value>
   </property>
 {% else %}
   <property>

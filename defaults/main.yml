@@ -5,6 +5,7 @@
 hdfs_cluster_name: cluster1
 hdfs_user: hdfs
 hdfs_group: hadoop
+hdfs_user_home: "/var/lib/{{ hdfs_user }}"
 hdfs_version: 2.7.3
 
 hdfs_java_home: /usr/lib/jvm/java-1.8.0-openjdk-amd64
@@ -20,13 +21,13 @@ hdfs_ansible_handlers: True
 hdfs_redistribute_ssh_keys: False
 
 hdfs_parent_dir: /usr/local  # hadoop binaries will be copied here
-hdfs_ssh_known_hosts_file: "/home/{{hdfs_user}}/.ssh/known_hosts"
+hdfs_ssh_known_hosts_file: "{{ hdfs_user_home }}/.ssh/known_hosts"
 
 #------------------------------------------------------------------------------
 # Hadoop installation source
 #------------------------------------------------------------------------------
 hdfs_distribution_method: "download"   # Method to use for archive installation ("download", "local_file" or "compile")
-hdfs_download_url: "http://mirror.switch.ch/mirror/apache/dist/hadoop/common/hadoop-{{ hdfs_version }}/hadoop-{{ hdfs_version }}.tar.gz"
+hdfs_download_url: "https://archive.apache.org/dist/hadoop/core/hadoop-{{ hdfs_version }}/hadoop-{{ hdfs_version }}.tar.gz"
 hdfs_local_archive_path: "./"
 
 #------------------------------------------------------------------------------

@@ -10,10 +10,12 @@
 - name: Fetch private key
   fetch: src={{ hdfs_user_home }}/.ssh/id_rsa dest=rsa_key
   when: inventory_hostname == hdfs_namenodes[0] and distribute_keys
+  check_mode: no
 
 - name: Fetch public key
   fetch: src={{ hdfs_user_home }}/.ssh/id_rsa.pub dest=rsa_key
   when: inventory_hostname == hdfs_namenodes[0] and distribute_keys
+  check_mode: no
 
 - name: Create .ssh directory for {{hdfs_user}}
   file: path={{ hdfs_user_home }}/.ssh state=directory owner={{hdfs_user}} group={{hdfs_group}} mode=0700
@@ -51,3 +53,4 @@
 - name: Delete key locally
   local_action: file path=rsa_key state=absent
   when: inventory_hostname == hdfs_namenodes[0] and distribute_keys
+  become: no

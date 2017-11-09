@@ -7,7 +7,7 @@
   when: inventory_hostname == hdfs_namenodes[0]
 
 - name: Create user on all machines
-  user: name={{hdfs_user}} comment="Hadoop superuser" uid=1040 group={{hdfs_group}} home={{ hdfs_user_home }} shell=/sbin/nologin createhome=yes
+  user: name={{hdfs_user}} comment="Hadoop superuser" uid=1040 group={{hdfs_group}} home={{ hdfs_user_home }} createhome=yes
   register: created_user
 
 - include: ssh_fence.yml

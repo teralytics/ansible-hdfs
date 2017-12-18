@@ -18,7 +18,6 @@
   - "libssl-dev"
   - "bzip2"
   - "libbz2-dev"
-  - "snappy"
   - "libsnappy-dev"
 
 - name: Copy Hadoop .tgz to {{hdfs_parent_dir}} and unpack it

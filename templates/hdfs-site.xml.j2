@@ -15,32 +15,32 @@
     <name>dfs.ha.namenodes.{{ hdfs_nameservices }}</name>
     <value>{{ hdfs_namenodes | join(',') }}</value>
   </property>
-{% if hdfs_ha_enabled and inventory_hostname in hdfs_namenodes %}
+  {% if hdfs_ha_enabled and inventory_hostname in hdfs_namenodes -%}
   <property>
     <name>dfs.ha.namenode.id</name>
     <value>{{ inventory_hostname }}</value>
   </property>
-{% endif %}
-{% for host in hdfs_namenodes %}
+  {% endif -%}
+  {% for host in hdfs_namenodes -%}
   <property>
     <name>dfs.namenode.rpc-address.{{ hdfs_nameservices }}.{{ host }}</name>
-    <value>{{ host }}:8020</value>
+    <value>{{ host }}{%- if hdfs_host_domain_name is defined -%}.{{ hdfs_host_domain_name }}{%- endif -%}:8020</value>
   </property>
   <property>
     <name>dfs.namenode.rpc-bind-host.{{ hdfs_nameservices }}.{{ host }}</name>
     <value>0.0.0.0</value>
   </property>
-{% endfor %}
-{% for host in hdfs_namenodes %}
+  {% endfor -%}
+  {% for host in hdfs_namenodes -%}
   <property>
     <name>dfs.namenode.http-address.{{ hdfs_nameservices }}.{{ host }}</name>
-    <value>{{ host }}:50070</value>
+    <value>{{ host }}{%- if hdfs_host_domain_name is defined -%}.{{ hdfs_host_domain_name }}{%- endif -%}:50070</value>
   </property>
   <property>
     <name>dfs.namenode.http-bind-host.{{ hdfs_nameservices }}.{{ host }}</name>
     <value>0.0.0.0</value>
   </property>
-{% endfor %}
+  {% endfor -%}
   <property>
     <name>dfs.namenode.shared.edits.dir</name>
     <value>qjournal://{{ hdfs_journalnodes | join(':8485' + ';') }}:8485/{{ hdfs_nameservices }}</value>
@@ -53,7 +53,7 @@
     <name>dfs.client.failover.proxy.provider.{{ hdfs_nameservices }}</name>
     <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
   </property>
-{% if hdfs_ssh_fence %}
+  {% if hdfs_ssh_fence -%}
   <property>
     <name>dfs.ha.fencing.methods</name>
     <value>sshfence</value>
@@ -62,12 +62,12 @@
     <name>dfs.ha.fencing.ssh.private-key-files</name>
     <value>{{ hdfs_user_home }}/.ssh/id_rsa</value>
   </property>
-{% else %}
+  {% else -%}
   <property>
       <name>dfs.ha.fencing.methods</name>
       <value>shell(/bin/true)</value>
   </property>
-{% endif %}
+  {% endif -%}
   <property>
     <name>dfs.ha.automatic-failover.enabled</name>
     <value>true</value>
@@ -79,7 +79,7 @@
   </property>
   <property>
     <name>dfs.namenode.checkpoint.dir</name>
-    <value>{{ hdfs_namenode_checkpoint_dir_list | join(',') }}</value>
+    <value>{{ hdfs_namenode_checkpoint_dir_list | map('regex_replace', '^(.*)$', 'file://\\1' ) | join(',') }}</value>
   </property>
 {% endif %}
   <property>
@@ -88,15 +88,14 @@
   </property>
   <property>
     <name>dfs.datanode.data.dir</name>
-    <value>{{ hdfs_datanode_dir_list | join(',') }}</value>
+    <value>{{ hdfs_datanode_dir_list | map('regex_replace', '^(.*)$', 'file://\\1' ) | join(',') }}</value>
   </property>
 {% if inventory_hostname in hdfs_namenodes %}
   <property>
     <name>dfs.namenode.name.dir</name>
-    <value>{{ hdfs_namenode_dir_list | join(',') }}</value>
+    <value>{{ hdfs_namenode_dir_list | map('regex_replace', '^(.*)$', 'file://\\1' ) | join(',') }}</value>
   </property>
 {% endif %}
-
   <property>
     <name>dfs.permissions.superusergroup</name>
     <value>{{ hdfs_dfs_permissions_superusergroup }}</value>
@@ -116,11 +115,11 @@
   </property>
   <property>
     <name>dfs.namenode.avoid.read.stale.datanode</name>
-    <value>{{ hdfs_dfs_namenode_avoid_read_stale_datanode | lower}}</value>
+    <value>{{ hdfs_dfs_namenode_avoid_read_stale_datanode | lower }}</value>
   </property>
   <property>
     <name>dfs.namenode.avoid.write.stale.datanode</name>
-    <value>{{ hdfs_dfs_namenode_avoid_write_stale_datanode | lower}}</value>
+    <value>{{ hdfs_dfs_namenode_avoid_write_stale_datanode | lower }}</value>
   </property>
   <property>
     <name>dfs.support.append</name>
@@ -190,14 +189,14 @@
   </property>
 {% endif %}
 {% if hdfs_site_additional_properties is defined %}
-{% for property in hdfs_site_additional_properties %}
+  {% for property in hdfs_site_additional_properties -%}
   <property>
     <name>{{property.name}}</name>
     <value>{{property.value}}</value>
-{% if property_final is defined %}
+{% if property_final is defined -%}
     <final>true</final>
 {% endif %}
   </property>
-{% endfor %}
+  {% endfor -%}
 {% endif %}
 </configuration>

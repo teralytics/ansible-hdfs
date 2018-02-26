@@ -1,0 +1,11 @@
+---
+- block:
+  - import_tasks: base.yml
+  - import_tasks: config.yml
+  - import_tasks: namenode.yml
+  - name: Restart namenode
+    service: name=hdfs-namenode state=restarted
+  when:
+    - inventory_hostname in hdfs_namenodes
+    - inventory_hostname == item
+  tags: upgrade_namenode

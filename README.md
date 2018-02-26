@@ -56,8 +56,13 @@ The following gives a list of important variables that have to be set for a spec
 * ```hdfs_namenode_checkpoint_dir_list```: Files of secondary namenode
 * ```hdfs_distribution_method```: Should tar.gz be 'downloaded', 'local_file' or 'compile' install?
 * ```hdfs_bootstrap```: Should the cluster be formatted? (If you have an already existing installation this option is not recommended)
+* ```hdfs_host_domain_name```: Only set this variable if your host entries are not FQDNs. E.g. value: "node.dns.example.com"
+* ```hdfs_upgrade```: Only set this variable to perform an upgrade (given that hdfs_version is changed)
+* ```hdfs_upgrade_force```: Only set this variable to force an upgrade (the playbook will run even if the version hasn't changed. Good when something went wrong and a node has been already upgraded)
 
 For more configuration variables see the documentation in [defaults/main.yml](https://github.com/teralytics/ansible-hdfs/blob/master/defaults/main.yml).
+
+If ```hdfs_upgrade``` is set to ```true``` the playbook will assume an upgrade is taking place and some input from the user might be required.
 
 #### Additional HDFS configuration
 Additional configuration to ```hdfs-site.xml``` and ```core-site.xml``` can be added by overwriting the following variables:
@@ -92,6 +97,21 @@ This playbook installs the hadoop binaries and creates links for easy usage.
 
 ##### config
 This playbook writes the configuration files.
+
+#### upgrade
+This playbook upgrades HDFS in a controlled way (applicable only to HA modes). This follows a procedure of no downtime that can be summarized as follows:
+
+1. Prepare rolling upgrade, wait for "Proceed with rolling upgrade"
+..1. Perform upgrade of active namenode (by means of failover to standby)
+..2. Failover to newly upgraded namenode, upgrade the second namenode
+2. Perform upgrade of the datanodes in a rolling fashion
+..1. Stop running datanode (check if running)
+..2. Install the new version
+..3. Restart it with the new program version (check if running)
+3. Finalize the rolling upgrade
+
+Be prepared to react to some input made by the playbook specially when dealing with starting and stopping of services.
+If anything goes wrong, and some nodes were already upgraded, run the playbook again setting ```hdfs_upgrade_force``` set to ```True```. This process is idempotent.
 
 ##### user
 This playbook will create a user ```hdfs_user```, generate an ssh-key for it, distribute the key and register all servers in known_hosts file of each other. 

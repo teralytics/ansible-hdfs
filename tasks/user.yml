@@ -10,5 +10,5 @@
   user: name={{hdfs_user}} comment="Hadoop superuser" uid=1040 group={{hdfs_group}} home={{ hdfs_user_home }} createhome=yes
   register: created_user
 
-- include: ssh_fence.yml
+- import_tasks: ssh_fence.yml
   when: hdfs_ssh_fence and inventory_hostname in hdfs_namenodes

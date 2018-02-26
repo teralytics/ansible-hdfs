@@ -1,5 +1,6 @@
-- name: Reload systemd daemon
-  command: "systemctl daemon-reload"
+---
+- name: Force systemd to reread configs
+  systemd: daemon_reload=yes
   when: ansible_service_mgr == "systemd"
 
 - name: Restart namenode

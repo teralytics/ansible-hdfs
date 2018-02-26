@@ -3,14 +3,10 @@
 
 <configuration>
   <property>
-    <name>fs.default.name</name>
-    <value>{{ hdfs_default_name }}</value>
-  </property>
-  <property>
     <name>fs.defaultFS</name>
     <value>{{ hdfs_default_fs }}</value>
   </property>
-  <property>            
+  <property>
     <name>hadoop.tmp.dir</name>
     <value>{{ hdfs_tmpdir_user }}</value>
   </property>

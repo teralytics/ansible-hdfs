@@ -25,7 +25,8 @@ def test_hdfs_site(File):
     assert e.tag == 'configuration'
     assert get(e, 'dfs.nameservices') == 'cluster1'
     assert get(e, 'dfs.nameservice.id') == 'cluster1'
-    assert get(e, 'dfs.ha.namenodes.cluster1') == 'hdfs1,hdfs2'
+    assert set(get(e, 'dfs.ha.namenodes.cluster1').split(
+        ',')) == set('hdfs1,hdfs2'.split(','))
 
     assert f.exists
     assert f.user == 'hdfs'
@@ -40,7 +41,8 @@ def test_core_site(File):
     e = xml.etree.ElementTree.fromstring(f.content_string)
     assert e.tag == 'configuration'
     assert get(e, 'fs.defaultFS') == 'hdfs://cluster1'
-    assert get(e, 'ha.zookeeper.quorum') == 'hdfs1:2181,hdfs2:2181,hdfs3:2181'
+    assert set(get(e, 'ha.zookeeper.quorum').split(',')) == set(
+        'hdfs1:2181,hdfs2:2181,hdfs3:2181'.split(','))
 
     assert f.exists
     assert f.user == 'hdfs'

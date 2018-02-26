@@ -4,9 +4,6 @@ hdfs0[1:3]
 [namenodes]
 hdfs0[1:2]
 
-[secondarynamenode]
-hdfs01
-
 [journalnodes]
 hdfs0[1:3]
 

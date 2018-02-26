@@ -36,7 +36,7 @@
 
 - name: Check host name availability
   shell: "ssh-keygen -f {{ hdfs_ssh_known_hosts_file }} -F {{ item }}"
-  with_items: "{{ hdfs_hadoop_hosts }}"
+  with_items: "{{ hdfs_namenodes }}"
   when: distribute_keys
   register: ssh_known_host_results
   ignore_errors: yes

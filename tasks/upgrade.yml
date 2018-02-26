@@ -1,0 +1,118 @@
+---
+- block:
+    - name: End play if not HA mode
+      debug:
+        msg: "Nothing to upgrade, ending play. This installation is not HA mode. No support for single instance."
+    - meta: end_play
+  when: "{{ hdfs_namenodes | length != 2 }}"
+
+- name: Check current version
+  shell: "./hdfs version 2> /dev/null | grep ^Hadoop | cut -c8-"
+  args:
+    chdir: "{{ hdfs_bin_dir }}"
+  become: yes
+  become_user: "{{ hdfs_user }}"
+  register: current_hdfs_version
+  changed_when: False
+
+- debug:
+    msg: "Current HDFS version is: {{ current_hdfs_version.stdout }}"
+    verbosity: 1
+
+- block:
+    - name: End play if nothing to upgrade
+      debug:
+        msg: "Nothing to upgrade, ending play. Current version is >= than upgrading version."
+    - meta: end_play
+  when:
+    - current_hdfs_version.stdout | version_compare(hdfs_version, '>=')
+    - not hdfs_upgrade_force
+
+- name: Prepare HDFS upgrade (create an fsimage for rollback)
+  command: "./hdfs dfsadmin -rollingUpgrade prepare"
+  args:
+    chdir: "{{ hdfs_bin_dir }}"
+  become: yes
+  become_user: "{{ hdfs_user }}"
+  when: inventory_hostname == hdfs_namenodes[0]
+
+- name: Check HDFS upgrade preparation (retry for 10 minutes)
+  command: "./hdfs dfsadmin -rollingUpgrade query"
+  args:
+    chdir: "{{ hdfs_bin_dir }}"
+  register: result
+  become: yes
+  become_user: "{{ hdfs_user }}"
+  until: result.stdout.find("Proceed with rolling upgrade") != -1
+  retries: 72
+  delay: 10
+  when: inventory_hostname == hdfs_namenodes[0]
+
+- name: Failover namenode "{{ hdfs_namenodes[0] }}" to "{{ hdfs_namenodes[1] }} if HA mode"
+  command: "./hdfs haadmin -failover {{ hdfs_namenodes[0] }} {{ hdfs_namenodes[1] }}"
+  args:
+    chdir: "{{ hdfs_bin_dir }}"
+  become: yes
+  become_user: "{{ hdfs_user }}"
+  when: inventory_hostname == hdfs_namenodes[0] and hdfs_ha_enabled
+
+- name: Upgrade namenode "{{ hdfs_namenodes[0] }}"
+  include_tasks: upgrade_namenode.yml
+  with_items:
+    - "{{ hdfs_namenodes[0] }}"
+
+- name: Ask for confirmation if namenode is up
+  pause:
+    prompt: "Make sure namenode service on {{ hdfs_namenodes[0] }} is FULLY up! Check the startup progress on the web GUI."
+
+- name: Ask for confirmation if safe mode is off
+  pause:
+    prompt: "Make sure SAFE MODE is OFF. You might have to wait a couple of seconds (usually 30 seconds). Follow the progress on the web GUI."
+
+- name: HDFS namenode on "{{ hdfs_namenodes[0] }}" is running
+  command: "./hdfs haadmin -checkHealth {{ hdfs_namenodes[0] }}"
+  args:
+    chdir: "{{ hdfs_bin_dir }}"
+  become: yes
+  become_user: "{{ hdfs_user }}"
+  any_errors_fatal: true
+  when: inventory_hostname == hdfs_namenodes[0]
+
+- name: Failover namenode "{{ hdfs_namenodes[1] }}" to "{{ hdfs_namenodes[0] }} if HA mode"
+  command: "./hdfs haadmin -failover {{ hdfs_namenodes[1] }} {{ hdfs_namenodes[0] }}"
+  args:
+    chdir: "{{ hdfs_bin_dir }}"
+  become: yes
+  become_user: "{{ hdfs_user }}"
+  when: inventory_hostname == hdfs_namenodes[1] and hdfs_ha_enabled
+
+- name: Upgrade namenode "{{ hdfs_namenodes[1] }}"
+  include_tasks: upgrade_namenode.yml
+  with_items:
+    - "{{ hdfs_namenodes[1] }}"
+
+- name: Ask for confirmation if namenode is up
+  pause:
+    prompt: "Make sure namenode service on {{ hdfs_namenodes[1] }} is FULLY up! Check the startup progress on the web GUI."
+
+- name: Ask for confirmation if safe mode is off
+  pause:
+    prompt: "Make sure SAFE MODE is OFF. You might have to wait a couple of seconds (usually 30 seconds). Follow the progress on the web GUI."
+
+- name: Upgrade datanodes
+  include_tasks: upgrade_datanode.yml
+  with_items:
+    - "{{ hdfs_datanodes }}"
+
+- name: Upgrade journalnodes
+  include_tasks: upgrade_journalnode.yml
+  with_items:
+    - "{{ hdfs_journalnodes }}"
+
+- name: Finalize HDFS upgrade
+  command: "./hdfs dfsadmin -rollingUpgrade finalize"
+  args:
+    chdir: "{{ hdfs_bin_dir }}"
+  become: yes
+  become_user: "{{ hdfs_user }}"
+  when: inventory_hostname == hdfs_namenodes[0]

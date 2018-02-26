@@ -4,25 +4,25 @@ galaxy_info:
   description: Installing HDFS for Ubuntu.
   company: Teralytics AG
   license: Apache 2.0
-  min_ansible_version: 2.0
+  min_ansible_version: 2.4
   platforms:
-  - name: Ubuntu
-    versions:
-    - trusty
-    - saucy
-    - raring
-    - vivid
-    - wily
-    - xenial
-  - name: Debian
-    versions:
-    - squeeze
-    - wheezy
-    - jessie
-  categories:
-  - hdfs
-  galaxy_tags:
-  - hdfs
-  - hadoop
-  - native
-  - installer
+    - name: Ubuntu
+      versions:
+        - trusty
+        - saucy
+        - raring
+        - vivid
+        - wily
+        - xenial
+    - name: Debian
+      versions:
+        - squeeze
+        - wheezy
+        - jessie
+      categories:
+        - hdfs
+      galaxy_tags:
+        - hdfs
+        - hadoop
+        - native
+        - installer

@@ -1,12 +1,14 @@
 ---
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # General cluster settings
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 hdfs_cluster_name: cluster1
 hdfs_user: hdfs
 hdfs_group: hadoop
 hdfs_user_home: "/var/lib/{{ hdfs_user }}"
-hdfs_version: 2.7.3
+hdfs_version: 2.8.2
+hdfs_upgrade: False
+hdfs_upgrade_force: False
 
 hdfs_java_home: /usr/lib/jvm/java-1.8.0-openjdk-amd64
 
@@ -23,16 +25,16 @@ hdfs_redistribute_ssh_keys: False
 hdfs_parent_dir: /usr/local  # hadoop binaries will be copied here
 hdfs_ssh_known_hosts_file: "{{ hdfs_user_home }}/.ssh/known_hosts"
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Hadoop installation source
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 hdfs_distribution_method: "download"   # Method to use for archive installation ("download", "local_file" or "compile")
 hdfs_download_url: "https://archive.apache.org/dist/hadoop/core/hadoop-{{ hdfs_version }}/hadoop-{{ hdfs_version }}.tar.gz"
 hdfs_local_archive_path: "./"
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Hadoop host variables
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 hdfs_namenodes: "{{ groups.namenodes }}"
 hdfs_hadoop_hosts: "{{ groups.hadoop_hosts }}"
 hdfs_journalnodes: "{{ groups.journalnodes }}"
@@ -40,37 +42,36 @@ hdfs_secondary_namenode: "{{ groups.secondarynamenode if groups.secondarynamenod
 hdfs_datanodes: "{{ groups.datanodes }}"
 hdfs_zookeeper_hosts: "{{ groups.zookeeper_hosts }}"
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Hadoop native libraries (experimental)
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 hdfs_compile_from_source: "{{ hdfs_distribution_method == 'compile' }}"
 hdfs_compile_node: "{{ hdfs_namenodes[0] }}"
 hdfs_compile_from_git: True
 hdfs_compile_version: "tags/rel/release-{{hdfs_version}}"
 hdfs_fetch_folder: /tmp/ansible_fetch
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # HA specific setup
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Use ssh as fencing method (other option is shell(/bin/true)
 hdfs_ssh_fence: True
 
 hdfs_ha_enabled: "{{hdfs_namenodes | count > 1}}"
-hdfs_default_name: "hdfs://{{ hdfs_nameservices if hdfs_ha_enabled else hdfs_namenodes[0] + ':8020' }}"
-hdfs_default_fs: "{{hdfs_default_name}}"
-hdfs_nameservices: "{{hdfs_cluster_name}}"
+hdfs_default_fs: "hdfs://{{ hdfs_nameservices if hdfs_ha_enabled else hdfs_namenodes[0] + ':8020' }}"
+hdfs_nameservices: "{{ hdfs_cluster_name }}"
 hdfs_zookeeper_client_port: 2181
 hdfs_zookeeper_quorum: "{{ hdfs_zookeeper_hosts | join(':' + (hdfs_zookeeper_client_port | string) + ',')  }}:{{ hdfs_zookeeper_client_port | string }}"
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Non-HA specific setup
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 hdfs_secondary_namenode_http_address: "0.0.0.0:50090"
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Hadoop configuration
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 # Symlink for hadoop to the version you are installing
 hdfs_hadoop_home: "{{hdfs_parent_dir}}/hadoop"
@@ -95,20 +96,16 @@ hdfs_dfs_journalnode_edits_dir_perm: "700"
 
 hdfs_enable_short_circuit_reads: true  # IMPORTANT: this property should be 'true' or 'false'
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Extended core-site.xml
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 hdfs_tmpdir_user: "{{hdfs_tmpdir}}/hadoop-${user.name}"
 hdfs_fs_trash_interval: 0
-hdfs_fs_trash_checkpoint_interval: 0 # If 0 this is set to the value of hdfs_fs_trash_interval by hadoop
+hdfs_fs_trash_checkpoint_interval: 0  # If 0 this is set to the value of hdfs_fs_trash_interval by hadoop
 
-#core_site_additional_properties:
-# - {name: fs.s3a.awsAccessKeyId, value: dsfds, final: true}
-# - {name: fs.s3a.awsSecretAccessKey, value: dsfds, final: true}
-
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Extended hdfs-site.xml
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 hdfs_fs_permissions_umask_mode: "002"
 hdfs_dfs_permissions_superusergroup: "{{hdfs_group}}"
@@ -134,16 +131,16 @@ hdfs_dfs_client_file_block_storage_locations_num_threads: 10
 hdfs_dfs_client_file_block_storage_locations_timeout_millis: 1000
 hdfs_dfs_domain_socket_path_folder: /var/lib/hadoop-hdfs
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # log4j.properties vars
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 hadoop_log_maxfilesize: "256MB"
 hadoop_log_maxbackupindex: 20
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # hadoop-env.sh vars
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 hdfs_namenode_heap_size: "2048m"
 hdfs_namenode_javaOpts: "-Xmx{{hdfs_namenode_heap_size}}"
 hdfs_datanode_javaOpts: ""
@@ -152,17 +149,9 @@ hdfs_datanode_javaOpts: ""
 hadoop_security_logger: "INFO,RFAS"
 hadoop_audit_logger: "INFO,NullAppender"
 
-
-# Nodes for decomissioning:
-#dfs_hosts_exclude:
-# - t03
-
-#hdfs_site_additional_properties:
-# - {name: dfs.namenode.stale.datanode.interval, value: 30000}
-
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Rack specific
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 # rack awareness script: see https://bigdataprocessing.wordpress.com/2013/07/30/hadoop-rack-awareness-and-configuration/)
 # and templates/rack-awareness.sh.j2

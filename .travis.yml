@@ -4,22 +4,14 @@ language: python
 services:
   - docker
 
-before_install:
-- sudo apt-get -qq update
-- sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
-
-# use ansible v2.2.0, as v2.2.1 has bad bug: https://github.com/ansible/ansible/issues/20392
-# require molecule v>1.20 (due to breaking change with group_vars)
-# Note: molecule >1.21 requires 'docker-py' replaced by newer 'docker' module
-# -> Details: http://molecule.readthedocs.io/en/stable-1.21/changelog.html#breaking-changes
 install:
-- pip install ansible==2.2.0.0
-- pip install molecule==1.20.3
-- pip install docker-py
+  - pip install ansible
+  - pip install molecule
+  - pip install docker-py
 
 script:
-- molecule --version
-- ansible --version
-- molecule test
+  - molecule --version
+  - ansible --version
+  - molecule test
 notifications:
 webhooks: https://galaxy.ansible.com/api/v1/notifications/

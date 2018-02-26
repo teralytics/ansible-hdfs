@@ -1,0 +1,45 @@
+---
+- block:
+  - name: Shutdown HDFS datanode {{ item }}
+    command: "./hdfs dfsadmin -shutdownDatanode {{ item }}:50020"
+    args:
+      chdir: "{{ hdfs_bin_dir }}"
+    become: yes
+    become_user: "{{ hdfs_user }}"
+
+  - name: Check HDFS datanode is running on {{ item }}
+    command: "./hdfs dfsadmin -getDatanodeInfo {{ item }}:50020"
+    args:
+      chdir: "{{ hdfs_bin_dir }}"
+    register: result
+    become: yes
+    become_user: "{{ hdfs_user }}"
+    until: result.stderr.find("Connection refused") != -1
+    retries: 2
+    delay: 10
+    failed_when: result.rc == 0
+  when:
+    - inventory_hostname in hdfs_datanodes
+    - inventory_hostname == item
+  tags: upgrade_datanode
+
+# The pause runs on the first (single one) node on the inventory list
+- name: Ask for confirmation if datanode is down
+  pause:
+    prompt: "Make sure hdfs-datanode service on {{ item }} is down"
+
+- block:
+    - import_tasks: base.yml
+    - import_tasks: config.yml
+    - import_tasks: datanode.yml
+    - name: Restart datanode
+      service: name=hdfs-datanode state=restarted
+  when:
+    - inventory_hostname in hdfs_datanodes
+    - inventory_hostname == item
+  tags: upgrade_datanode
+
+# The pause runs on the first (single one) node on the inventory list
+- name: Ask for confirmation if datanode is up
+  pause:
+    prompt: "Make sure hdfs-datanode service on {{ item }} is up"

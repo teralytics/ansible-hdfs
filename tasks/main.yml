@@ -1,37 +1,42 @@
 ---
-- include: user.yml
+- import_tasks: user.yml
   tags: user
 
-- include: native.yml
+- import_tasks: native.yml
   when: hdfs_compile_from_source and inventory_hostname == hdfs_compile_node
   tags: native
 
-- include: base.yml
+- import_tasks: base.yml
   tags: base
 
-- include: config.yml
+- import_tasks: config.yml
   tags: base,config
 
-- include: datanode.yml
+- import_tasks: datanode.yml
   when: inventory_hostname in hdfs_datanodes
   tags: datanode
 
-- include: namenode.yml
+- import_tasks: namenode.yml
   when: inventory_hostname in hdfs_namenodes
   tags: namenode
 
-- include: secondarynamenode.yml
+- import_tasks: secondarynamenode.yml
   when: inventory_hostname in hdfs_secondary_namenode and not hdfs_ha_enabled
   tags: secondarynamenode
 
-- include: journalnode.yml
+- import_tasks: journalnode.yml
   when: inventory_hostname in hdfs_journalnodes and hdfs_ha_enabled
   tags: journalnode
 
-- include: bootstrap_spof.yml
+- import_tasks: bootstrap_spof.yml
   when: hdfs_bootstrap and not hdfs_ha_enabled
   tags: bootstrap
 
-- include: bootstrap_ha.yml
+- import_tasks: bootstrap_ha.yml
   when: hdfs_bootstrap and hdfs_ha_enabled
   tags: bootstrap
+
+- import_tasks: upgrade.yml
+  any_errors_fatal: True
+  when: hdfs_upgrade
+  tags: upgrade

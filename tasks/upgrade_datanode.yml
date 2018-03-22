@@ -1,14 +1,20 @@
 ---
 - block:
-  - name: Shutdown HDFS datanode {{ item }}
-    command: "./hdfs dfsadmin -shutdownDatanode {{ item }}:50020"
+  - name: Shutdown HDFS datanode
+    command: "./hdfs dfsadmin -shutdownDatanode {{ hdfs_datanode }}:50020"
     args:
       chdir: "{{ hdfs_bin_dir }}"
     become: yes
     become_user: "{{ hdfs_user }}"
+    register: datanode_shutdown
 
-  - name: Check HDFS datanode is running on {{ item }}
-    command: "./hdfs dfsadmin -getDatanodeInfo {{ item }}:50020"
+  - name: Output from shutdown
+    debug:
+      msg: "Output from shutdown: {{ datanode_shutdown.stdout }}"
+      verbosity: 1
+
+  - name: Check HDFS datanode is running
+    command: "./hdfs dfsadmin -getDatanodeInfo {{ hdfs_datanode }}:50020"
     args:
       chdir: "{{ hdfs_bin_dir }}"
     register: result
@@ -19,14 +25,15 @@
     delay: 10
     failed_when: result.rc == 0
   when:
-    - inventory_hostname in hdfs_datanodes
-    - inventory_hostname == item
+    - inventory_hostname == hdfs_datanode
+    - not hdfs_uptodate
   tags: upgrade_datanode
 
 # The pause runs on the first (single one) node on the inventory list
 - name: Ask for confirmation if datanode is down
   pause:
-    prompt: "Make sure hdfs-datanode service on {{ item }} is down"
+    prompt: "Make sure hdfs-datanode service on {{ hdfs_datanode }} is down"
+  when: not hdfs_uptodate
 
 - block:
     - import_tasks: base.yml
@@ -35,11 +42,12 @@
     - name: Restart datanode
       service: name=hdfs-datanode state=restarted
   when:
-    - inventory_hostname in hdfs_datanodes
-    - inventory_hostname == item
+    - inventory_hostname == hdfs_datanode
+    - not hdfs_uptodate
   tags: upgrade_datanode
 
 # The pause runs on the first (single one) node on the inventory list
 - name: Ask for confirmation if datanode is up
   pause:
-    prompt: "Make sure hdfs-datanode service on {{ item }} is up"
+    prompt: "Make sure hdfs-datanode service on {{ hdfs_datanode }} is up"
+  when: not hdfs_uptodate

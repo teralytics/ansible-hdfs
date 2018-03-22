@@ -4,7 +4,7 @@
       debug:
         msg: "Nothing to upgrade, ending play. This installation is not HA mode. No support for single instance."
     - meta: end_play
-  when: "{{ hdfs_namenodes | length != 2 }}"
+  when: hdfs_namenodes | length != 2
 
 - name: Check current version
   shell: "./hdfs version 2> /dev/null | grep ^Hadoop | cut -c8-"
@@ -28,13 +28,24 @@
     - current_hdfs_version.stdout | version_compare(hdfs_version, '>=')
     - not hdfs_upgrade_force
 
+- name: Set if should upgrade HDFS
+  set_fact:
+    hdfs_uptodate: "{{ current_hdfs_version.stdout | version_compare(hdfs_version, '>=') }}"
+
+- name: Should upgrade hdfs
+  debug:
+    msg: "Variable is {{ hdfs_uptodate }}"
+  verbosity: 2
+
 - name: Prepare HDFS upgrade (create an fsimage for rollback)
   command: "./hdfs dfsadmin -rollingUpgrade prepare"
   args:
     chdir: "{{ hdfs_bin_dir }}"
   become: yes
   become_user: "{{ hdfs_user }}"
-  when: inventory_hostname == hdfs_namenodes[0]
+  when:
+    - inventory_hostname == hdfs_namenodes[0]
+    - not hdfs_uptodate
 
 - name: Check HDFS upgrade preparation (retry for 10 minutes)
   command: "./hdfs dfsadmin -rollingUpgrade query"
@@ -46,7 +57,9 @@
   until: result.stdout.find("Proceed with rolling upgrade") != -1
   retries: 72
   delay: 10
-  when: inventory_hostname == hdfs_namenodes[0]
+  when:
+    - inventory_hostname == hdfs_namenodes[0]
+    - not hdfs_uptodate
 
 - name: Failover namenode "{{ hdfs_namenodes[0] }}" to "{{ hdfs_namenodes[1] }} if HA mode"
   command: "./hdfs haadmin -failover {{ hdfs_namenodes[0] }} {{ hdfs_namenodes[1] }}"
@@ -54,20 +67,33 @@
     chdir: "{{ hdfs_bin_dir }}"
   become: yes
   become_user: "{{ hdfs_user }}"
-  when: inventory_hostname == hdfs_namenodes[0] and hdfs_ha_enabled
+  when:
+    - inventory_hostname == hdfs_namenodes[0]
+    - hdfs_ha_enabled
+    - not hdfs_uptodate
 
 - name: Upgrade namenode "{{ hdfs_namenodes[0] }}"
   include_tasks: upgrade_namenode.yml
+  loop_control:
+    loop_var: hdfs_namenode
   with_items:
     - "{{ hdfs_namenodes[0] }}"
 
 - name: Ask for confirmation if namenode is up
   pause:
     prompt: "Make sure namenode service on {{ hdfs_namenodes[0] }} is FULLY up! Check the startup progress on the web GUI."
+  run_once: true
+  delegate_to: hdfs_namenodes[0]
+  when:
+    - not hdfs_uptodate
 
 - name: Ask for confirmation if safe mode is off
   pause:
     prompt: "Make sure SAFE MODE is OFF. You might have to wait a couple of seconds (usually 30 seconds). Follow the progress on the web GUI."
+  run_once: true
+  delegate_to: hdfs_namenodes[0]
+  when:
+    - not hdfs_uptodate
 
 - name: HDFS namenode on "{{ hdfs_namenodes[0] }}" is running
   command: "./hdfs haadmin -checkHealth {{ hdfs_namenodes[0] }}"
@@ -76,7 +102,9 @@
   become: yes
   become_user: "{{ hdfs_user }}"
   any_errors_fatal: true
-  when: inventory_hostname == hdfs_namenodes[0]
+  when:
+    - inventory_hostname == hdfs_namenodes[0]
+    - not hdfs_uptodate
 
 - name: Failover namenode "{{ hdfs_namenodes[1] }}" to "{{ hdfs_namenodes[0] }} if HA mode"
   command: "./hdfs haadmin -failover {{ hdfs_namenodes[1] }} {{ hdfs_namenodes[0] }}"
@@ -84,30 +112,48 @@
     chdir: "{{ hdfs_bin_dir }}"
   become: yes
   become_user: "{{ hdfs_user }}"
-  when: inventory_hostname == hdfs_namenodes[1] and hdfs_ha_enabled
+  when:
+    - inventory_hostname == hdfs_namenodes[1]
+    - hdfs_ha_enabled
 
 - name: Upgrade namenode "{{ hdfs_namenodes[1] }}"
   include_tasks: upgrade_namenode.yml
   with_items:
     - "{{ hdfs_namenodes[1] }}"
+  loop_control:
+    loop_var: hdfs_namenode
+  when:
+    - not hdfs_uptodate
 
 - name: Ask for confirmation if namenode is up
   pause:
     prompt: "Make sure namenode service on {{ hdfs_namenodes[1] }} is FULLY up! Check the startup progress on the web GUI."
+  run_once: true
+  delegate_to: hdfs_namenodes[1]
+  when:
+    - not hdfs_uptodate
 
 - name: Ask for confirmation if safe mode is off
   pause:
     prompt: "Make sure SAFE MODE is OFF. You might have to wait a couple of seconds (usually 30 seconds). Follow the progress on the web GUI."
+  run_once: true
+  delegate_to: hdfs_namenodes[1]
+  when:
+    - not hdfs_uptodate
 
 - name: Upgrade datanodes
   include_tasks: upgrade_datanode.yml
   with_items:
     - "{{ hdfs_datanodes }}"
+  loop_control:
+    loop_var: hdfs_datanode
 
 - name: Upgrade journalnodes
   include_tasks: upgrade_journalnode.yml
   with_items:
     - "{{ hdfs_journalnodes }}"
+  loop_control:
+    loop_var: hdfs_journalnode
 
 - name: Finalize HDFS upgrade
   command: "./hdfs dfsadmin -rollingUpgrade finalize"

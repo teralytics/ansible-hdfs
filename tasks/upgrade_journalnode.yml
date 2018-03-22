@@ -3,6 +3,5 @@
   - name: Restart journalnode
     service: name=hdfs-journalnode state=restarted
   when:
-    - inventory_hostname in hdfs_journalnodes
-    - inventory_hostname == item
+    - inventory_hostname == hdfs_journalnode
   tags: upgrade_journalnode

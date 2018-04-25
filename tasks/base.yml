@@ -40,7 +40,7 @@
   file: src="{{hdfs_bin_dir}}/hadoop" dest=/usr/local/bin/hadoop owner={{hdfs_user}} group={{hdfs_group}} mode=0755 state=link
 
 - name: Export hadoop variables
-  copy: content="export HADOOP_HOME={{hdfs_hadoop_home}}\nexport HADOOP_PREFIX={{hdfs_hadoop_home}}\nexport HADOOP_CONF_DIR={{hdfs_conf_dir}}\nexport HADOOP_LIBEXEC_DIR={{hdfs_hadoop_home}}/libexec" dest="/etc/profile.d/hadoop_exports.sh" mode=0755
+  copy: content="export HADOOP_HOME={{hdfs_hadoop_home}}\nexport HADOOP_PREFIX={{hdfs_hadoop_home}}\nexport HADOOP_CONF_DIR={{hdfs_conf_dir}}\nexport HADOOP_LIBEXEC_DIR={{hdfs_hadoop_home}}/libexec\nexport HADOOP_CLASSPATH=`/usr/local/bin/hadoop classpath`" dest="/etc/profile.d/hadoop_exports.sh" mode=0755
 
 - name: Allow hadoop variables keeping for sudoers
   template: src=hadoop_sudoers.j2 dest=/etc/sudoers.d/hadoop owner=root group=root mode=0644

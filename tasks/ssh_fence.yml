@@ -34,9 +34,15 @@
   when: (not host_file_status.stat.exists) or (distribute_keys and host_file_status.stat.mode == "0644")
   changed_when: (not host_file_status.stat.exists) or host_file_status.stat.mode != "0644"
 
+- set_fact: hdfs_namenodes_long={{ hdfs_namenodes }}
+
+- name: Add long names to namenodes for proper key deployment
+  set_fact: hdfs_namenodes_long={{ hdfs_namenodes_long | map('regex_replace', '(.*)', '\\1.' + hdfs_host_domain_name ) | list}}
+  when: hdfs_host_domain_name is defined
+
 - name: Check host name availability
   shell: "ssh-keygen -f {{ hdfs_ssh_known_hosts_file }} -F {{ item }}"
-  with_items: "{{ hdfs_namenodes }}"
+  with_items: "{{ hdfs_namenodes_long }}"
   when: distribute_keys
   register: ssh_known_host_results
   ignore_errors: yes

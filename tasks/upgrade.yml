@@ -35,7 +35,7 @@
 - name: Should upgrade hdfs
   debug:
     msg: "Variable is {{ hdfs_uptodate }}"
-  verbosity: 2
+    verbosity: 2
 
 - name: Prepare HDFS upgrade (create an fsimage for rollback)
   command: "./hdfs dfsadmin -rollingUpgrade prepare"

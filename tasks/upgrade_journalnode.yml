@@ -2,6 +2,13 @@
 - block:
   - name: Restart journalnode
     service: name=hdfs-journalnode state=restarted
+  - name: Wait for Journal Node port to become open, don't start checking for 10 seconds
+    wait_for: 
+      port: 8485
+      delay: 10
+  - name: Pause for 20 seconds until the JournalNode is properly restarted
+    pause:
+      seconds: 20
   when:
     - inventory_hostname == hdfs_journalnode
   tags: upgrade_journalnode

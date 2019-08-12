@@ -24,7 +24,7 @@
   {% for host in hdfs_namenodes -%}
   <property>
     <name>dfs.namenode.rpc-address.{{ hdfs_nameservices }}.{{ host }}</name>
-    <value>{{ host }}{%- if hdfs_host_domain_name | length > 0 -%}.{{ hdfs_host_domain_name }}{%- endif -%}:8020</value>
+    <value>{{ host }}{%- if hdfs_host_domain_name is defined -%}.{{ hdfs_host_domain_name }}{%- endif -%}:8020</value>
   </property>
   <property>
     <name>dfs.namenode.rpc-bind-host.{{ hdfs_nameservices }}.{{ host }}</name>
@@ -34,7 +34,7 @@
   {% for host in hdfs_namenodes -%}
   <property>
     <name>dfs.namenode.http-address.{{ hdfs_nameservices }}.{{ host }}</name>
-    <value>{{ host }}{%- if hdfs_host_domain_name | length > 0 -%}.{{ hdfs_host_domain_name }}{%- endif -%}:50070</value>
+    <value>{{ host }}{%- if hdfs_host_domain_name is defined -%}.{{ hdfs_host_domain_name }}{%- endif -%}:50070</value>
   </property>
   <property>
     <name>dfs.namenode.http-bind-host.{{ hdfs_nameservices }}.{{ host }}</name>

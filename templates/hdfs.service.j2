@@ -9,8 +9,7 @@ ExecStart={{ hdfs_hadoop_home }}/sbin/hadoop-daemon.sh --config {{ hdfs_conf_dir
 ExecStop={{ hdfs_hadoop_home }}/sbin/hadoop-daemon.sh --config {{ hdfs_conf_dir }} --script hdfs stop {{ program }}
 RemainAfterExit=no
 Restart=on-failure
-Environment=HADOOP_PID_DIR=/tmp
-PIDFile=$HADOOP_PID_DIR/hadoop-hdfs-{{program}}.pid
+PIDFile=/tmp/hadoop-hdfs-{{program}}.pid
 
 TimeoutSec=300
 

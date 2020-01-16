@@ -1,0 +1,17 @@
+---
+- name: Create log compress and rotate script on {{ hdfs_bin_dir }}
+  template:
+    src: "audit-compress-rotate.sh.j2"
+    dest: "{{ hdfs_bin_dir }}/audit-compress-rotate.sh"
+    owner: "{{ hdfs_user }}"
+    group: "{{ hdfs_group }}"
+    mode: "0750"
+  when: inventory_hostname in hdfs_namenodes
+
+# run compress and rotate after the linux log rotate (default 6:25 AM)
+- cron:
+    name: Log compress and rotate cronjob
+    state: present
+    minute: "0"
+    hour: "7"
+    job: "{{ hdfs_bin_dir }}/audit-compress-rotate.sh 2>&1 | /usr/bin/logger -t hdfs"

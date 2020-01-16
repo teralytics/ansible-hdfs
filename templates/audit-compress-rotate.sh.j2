@@ -1,0 +1,14 @@
+#!/bin/bash
+LOGDIR={{ hdfs_log_dir }}
+TODAY=$(date +'%Y%m%d')
+
+cd $LOGDIR
+
+# compress any hdfs-audit files that are not still being used (already rotated)
+for LOGFILE in $(ls | egrep '[[:digit:]]{4}\-[[:digit:]]{2}\-[[:digit:]]{2}$'); do
+    LOGFILEDATE=$(echo $LOGFILE | cut -d'.' -f3 | sed -e 's/-//g');
+    [ $LOGFILEDATE -lt $TODAY ] && gzip $LOGFILE
+done
+
+# rotate files older than {{ hdfs_audit_rotate_days }} days
+find -iname "hdfs-audit*" -mtime +{{ hdfs_audit_rotate_days }} -delete

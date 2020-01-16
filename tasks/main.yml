@@ -40,3 +40,6 @@
   any_errors_fatal: True
   when: hdfs_upgrade
   tags: upgrade
+
+- import_tasks: scripts.yml
+  tags: scripts

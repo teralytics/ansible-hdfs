@@ -158,3 +158,8 @@ hadoop_audit_logger: "INFO,NullAppender"
 # if this is not defined, the hdfs will not be rack aware. DO NOT USE SINGLE QUOTES (or make sure it works)
 # hdfs_rack_script_awk: '"{if ($4 < 3) print "rack-1"; else print "rack-2" }"'
 hdfs_rack_script_path: "{{hdfs_conf_dir}}/rack-awareness.sh"
+
+# ------------------------------------------------------------------------------
+# Custom scripts
+# ------------------------------------------------------------------------------
+hdfs_audit_rotate_days: 90 # ISO 27001 compliance

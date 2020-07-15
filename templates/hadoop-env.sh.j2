@@ -33,7 +33,7 @@ export JAVA_HOME=${JAVA_HOME:-"{{ hdfs_java_home }}"}
 export HADOOP_CONF_DIR=${HADOOP_CONF_DIR:-"/etc/hadoop"}
 
 # Extra Java CLASSPATH elements.  Automatically insert capacity-scheduler.
-for f in $HADOOP_HOME/contrib/capacity-scheduler/*.jar; do
+for f in $HADOOP_HOME/contrib/capacity-scheduler/*.jar {{ hdfs_extra_classpath | join(" ") }} ; do
   if [ "$HADOOP_CLASSPATH" ]; then
     export HADOOP_CLASSPATH=$HADOOP_CLASSPATH:$f
   else

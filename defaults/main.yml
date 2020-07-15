@@ -12,6 +12,8 @@ hdfs_upgrade_force: False
 
 hdfs_java_home: /usr/lib/jvm/java-1.8.0-openjdk-amd64
 
+hdfs_extra_classpath: []
+
 # Bootstraps the cluster ( Format namenodes, zkfc, journalnodes, start all services)
 # Please read the code before you activate this option.
 # Especially if you already have a hadoop setup in place.
